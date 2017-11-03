@@ -1,0 +1,669 @@
+/*@import url('https://fonts.googleapis.com/css?family=Nunito:400,700,900');*/
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: hsla(45, 35%, 32%, .65);
+  text-shadow: 0 1px 3px hsla(0, 0%, 0%, .2);
+  color: #fff;
+}
+
+::-moz-selection {
+  background: hsla(45, 35%, 32%, .65);
+  text-shadow: 0 1px 3px hsla(0, 0%, 0%, .2);
+  color: #fff;
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Nunito', 'Varela Round', 'Roboto', Helvetica, Arial, sans-serif;
+  text-align: center;
+  background: hsl(0, 0%, 10%);
+  color: hsl(0, 0%, 90%);
+  transition: background-color 200ms ease-in;
+}
+
+@keyframes grimstack-pulse {
+  0% {
+    text-shadow: 0 0 1px #E3DAC9;
+  }
+  100% {
+    text-shadow: 0 0 8px #E3DAC9;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pop-out {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+.pop-in {
+  animation: pop-in 200ms ease-in;
+}
+
+.pop-out {
+  animation: pop-out 160ms ease-in;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotateZ(0);
+  }
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+@keyframes rock {
+  0% {
+    transform: rotateZ(-10deg);
+  }
+  50% {
+    transform: rotateZ(0);
+  }
+  100% {
+    transform: rotateZ(10deg);
+  }
+}
+
+.grm-spin4 {
+  font-size: 2.5em;
+  animation: spin 520ms ease-in infinite;
+}
+
+.fancyfont, .notify, #GrimstackHead, [ui],[ui]>span, #authform button, .postDesc>a>header, .pvTitle, #postList>header, .toggle, .postDesc>a>header {
+  font-family: 'Nunito', 'Varela Round', 'Roboto', Helvetica, Arial, sans-serif;
+}
+
+.txtcenter {
+  text-align: center;
+}
+
+.roundcorners,
+[ui], .notify, #account, #ctx, .closeCtx, .bio,
+#postList, #postList>header, #postList>.pager>div,
+.details, .tags, #authform, #authform button,
+.postDesc, .postDesc>aside>div, .postDesc>a>header, #authform>section>* {
+  border-radius: 4px;
+}
+
+.round {
+  border-radius: 100%;
+}
+
+.flex-centered, .notify, #ui, [ui], #ctx, #postList, #postList>.pager, #account, .closeCtx, .profile, .bio {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  flex-flow: column;
+}
+
+#notifications {
+  position: fixed;
+  align-items: flex-start;
+  flex-flow: column-reverse;
+  bottom: 1%;
+  left: 1%;
+  z-index: 10;
+}
+
+.notify {
+  width: auto;
+  flex-flow: nowrap;
+  width: 95%;
+  max-width: 600px;
+  margin: 5px;
+  padding: 6px 6px 6px 8px;
+  background: hsl(0,0%,35%);
+  color: #fff;
+  box-shadow: 0 2px 6px hsla(0,0%,0%,.2);
+  border: 2px dashed hsl(214,100%,55%);
+}
+
+.notify > * {
+  position: relative;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.notify > .close::before {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.notify > .close {
+  display: inline-flex !important;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 2em;
+  width: 36px;
+  height: 36px;
+  background: #fff;
+  color: hsl(0,63%,53%);
+  margin-right: 10px;
+}
+
+.notify.warn {
+  border: 2px dashed hsl(46,100%,54%);
+}
+.notify.err {
+  border: 2px dashed hsl(0,100%,53%);
+}
+
+#ui {
+  justify-content: flex-start;
+  flex-flow: row-reverse;
+  text-align: center;
+  overflow: visible;
+  user-select: none;
+  height: 75px;
+  padding: 10px;
+  width: 100%;
+  background: hsl(0, 0%, 20%);
+}
+
+#ui>* {
+  margin-right: 10px;
+  height: 50px;
+}
+
+[ui] {
+  margin-right: 10px;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  cursor: pointer;
+  background: #fff;
+  color: hsl(0, 0%, 35%);
+}
+
+[ui]::before, #ctx, .closeCtx, .logout {
+  font-size: 1.6em;
+  vertical-align: middle;
+}
+
+#ctx {
+  width: auto;
+  cursor: pointer;
+  padding: 0 10px 0 10px;
+  color: hsl(0, 0%, 30%);
+  font-weight: 900;
+}
+
+.closeCtx {
+  background: #fff;
+  color: hsl(0, 78%, 55%);
+  cursor: pointer;
+  font-size: 2.8em;
+}
+
+.closeCtx, .logout, #account {
+  width: 50px;
+}
+
+.logout {
+  background: #fff;
+  cursor: pointer;
+  color: hsl(0, 0%, 30%);
+}
+
+#account, [ui] {
+  overflow: hidden;
+}
+
+#account>img {
+  width: 100%;
+  height: 100%;
+}
+
+.profile {
+  text-align: center;
+}
+
+.profileDetails {
+  max-width: 400px;
+  min-width: 280px;
+  padding: 10px;
+  margin: 10px;
+  background: hsl(0,0%,15%);
+}
+
+.profileDetails > img {
+  border: 2px solid #fff;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.bio span {
+  font-weight: bold;
+  font-size: 1.1em;
+  text-align: left;
+  width: 100%;
+  margin: 0 0 6px 0;
+}
+
+.bio {
+  background: hsl(0,0%,20%);
+  color: #fff;
+  max-width: 260px;
+  padding: 10px;
+}
+
+#postList {
+  padding: 60px 0 10px 0;
+  width: 620px;
+  margin: 25px auto 25px auto;
+  text-align: center;
+  background: hsl(0, 0%, 14%);
+  z-index: 0;
+}
+
+#postList>header {
+  position: absolute;
+  top: 1%;
+  left: 2%;
+  display: block;
+  text-align: center;
+  font-size: 1.4em;
+  font-weight: 900;
+  text-shadow: 0 1px 3px hsl(0, 0%, 0%, .2);
+}
+
+#postList>.pager {
+  user-select: none;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  flex-flow: row;
+}
+
+#postList>.pager>div {
+  position: relative;
+  display: block;
+  margin: 6px;
+  cursor: pointer;
+  padding: 5px 10px 5px 10px;
+  background: hsl(0, 0%, 20%);
+}
+
+#postList>.postDesc:last-of-type {
+  margin-bottom: 6px;
+}
+
+.postDesc {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 10px 0 25px 46px;
+  width: calc(96% - 46px);
+  border-radius: 0 4px 4px 4px;
+  background: hsl(0, 0%, 20%);
+  color: hsl(0, 0%, 80%);
+}
+
+.postDesc>a {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  margin: 0;
+  padding: 5px;
+}
+
+.postDesc>a>header {
+  position: relative;
+  display: block;
+  text-align: left;
+  color: #fff;
+  background: hsl(0, 0%, 25%);
+  background: radial-gradient(ellipse at center, hsl(0, 1%, 30) 0%, hsl(0, 1%, 30%) 50%, hsl(0, 0%, 20%) 100%);
+  font-size: 1.25em;
+  padding: 5px 10px 5px 10px;
+}
+
+.postDesc>aside {
+  position: absolute;
+  text-align: center;
+  user-select: none;
+  top: 0;
+  right: 100%;
+  padding: 4px 0 4px 4px;
+  border-radius: 4px 0 0 4px;
+  background: hsl(0, 0%, 20%);
+}
+
+.postDesc>aside>div {
+  position: relative;
+  display: block;
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  font-size: .8em;
+  background: hsl(0, 0%, 26%);
+  color: hsl(0, 0%, 70%);
+  cursor: pointer;
+  transition: all 100ms ease;
+}
+
+.postDesc>aside>div:hover {
+  box-shadow: 0 2px 16px hsla(0, 0%, 0%, .2);
+  filter: brightness(1.2);
+}
+
+.postDesc>aside>div:first-of-type {
+  margin-bottom: 4px;
+}
+
+.postDesc>aside>div::before {
+  display: block;
+  white-space: nowrap;
+  margin: 3px auto 1px auto;
+  font-size: 1.4em;
+}
+
+.postDesc>section {
+  padding: 5px 10px 5px 10px;
+  font-size: 1.05em;
+  text-align: left;
+}
+
+.postDesc>footer {
+  position: relative;
+  display: block;
+  text-align: left;
+  margin: 0 auto;
+  padding: 4px 0 4px 4px;
+}
+
+.details, .tags {
+  position: relative;
+  display: inline-block;
+  background: hsl(0, 0%, 25%);
+  margin-top: 5px;
+  padding: 3px 5px 3px 5px;
+  font-size: .88em;
+}
+
+.details::before, .tags::before {
+  margin: 0;
+  font-size: 1.1em;
+  color: hsl(0, 0%, 65%);
+  vertical-align: middle;
+}
+
+.tags {
+  margin-right: 4px;
+}
+
+.details {
+  margin-top: 4px;
+}
+
+.pvHead>.details {
+  margin: 4px 0 5px 0;
+}
+
+.pvHead>.details>* {
+  margin: 0 5px 0 0;
+}
+
+.details>*, .tags>span {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 1px 0 4px;
+}
+
+.details>time::before {
+  content: "written ";
+}
+
+.details>span::before {
+  content: "by ";
+}
+
+.tags {
+  display: inline-block;
+  text-align: left;
+}
+
+.tags>span {
+  cursor: pointer;
+  transition: all 130ms ease-in;
+}
+
+.tags>span:hover {
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+#postViewer {
+  position: relative;
+  display: inline-block;
+  text-align: left;
+  width: auto;
+  max-width: 720px;
+  margin: 1% auto;
+  padding: 6px;
+  font-size: 1.2em;
+}
+
+#postViewer>article, #postViewer>footer {
+  position: relative;
+  display: inline-block;
+  line-height: 1.45;
+}
+
+#postViewer .details, #postViewer .tags {
+  background: hsla(0, 0%, 10%, .4);
+}
+
+.pvHead {
+  position: relative;
+  display: inline-block;
+  text-align: justify;
+}
+
+.pvTitle {
+  position: relative;
+  display: inline-block;
+  font-size: 2em;
+}
+
+#authform {
+  position: relative;
+  display: block;
+  width: 333px;
+  padding: 10px 15px 10px 15px;
+  background: hsl(0, 0%, 20%);
+  margin: 40px auto;
+  text-align: center;
+  box-shadow: 0 3px 25px -4px hsla(0, 0%, 0%, .3);
+}
+
+#authform>section>* {
+  position: relative;
+  display: block;
+  outline: none;
+  border: none;
+  margin: 12px auto;
+  padding: 5px;
+  font-size: 1.1em;
+}
+
+#authform>section>input {
+  color: hsl(0, 0%, 20%);
+}
+
+#authform button {
+  background: hsl(0, 0%, 33%);
+  color: #E3DAC9;
+  font-size: 1.3em;
+  font-weight: bold;
+  height: 55px;
+  width: 55px;
+  border: 1px solid transparent;
+  margin: 18px auto 0 auto;
+  cursor: pointer;
+  transition: all 140ms ease-in;
+}
+
+#authform button:hover {
+  border: 1px solid #E3DAC9;
+  filter: drop-shadow(0 1px 3px hsla(0, 0%, 0%, .2));
+}
+
+#authform button:active {
+  border: 1px solid #E3DAC9;
+  filter: none;
+  box-shadow: inset 0 0 8px hsla(0, 0%, 0%, .2);
+}
+
+.authMsg {
+  border: 1px dotted hsl(0, 72%, 45%);
+  color: hsl(0, 72%, 60%);
+  background: hsl(0, 0%, 25%);
+  font-size: 1.2em;
+  padding: 8px;
+  margin: 15px auto 5px auto;
+}
+
+details {
+  text-align: left;
+  font-size: .94em;
+  margin: 5px auto 15px auto;
+}
+
+details>summary {
+  cursor: help;
+  outline: none;
+  border: none;
+}
+
+.toggle {
+  position: relative;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  height: 40px;
+  margin: 12px auto;
+  padding: 5px;
+  font-size: 1.1em;
+}
+
+.toggle span {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  margin: 0 8px 0 8px;
+}
+
+.toggle>.left, .toggle>.right {
+  transition: all 140ms ease-in;
+}
+
+.toggle>.back {
+  height: 6mm;
+  width: 14mm;
+  border-radius: 12px;
+  overflow: visible;
+  cursor: pointer;
+  background: hsl(0, 0%, 80%);
+  box-shadow: inset 0 0 4px hsla(0, 0%, 0%, .24);
+}
+
+.toggle .middle {
+  position: absolute;
+  top: -1mm;
+  left: 0;
+  margin: 0;
+  background: #fff;
+  height: 8mm;
+  width: 8mm;
+  border-radius: 100%;
+  transition: 140ms ease-in;
+  filter: drop-shadow(0 1px 3px hsla(0, 0%, 0%, .2));
+}
+
+.toggle.active .middle {
+  left: calc(100% - 6mm);
+}
+
+@media all and (max-width: 832px) {
+  #postViewer {
+    font-size: 1.1em;
+  }
+  .pvTitle {
+    font-size: 2em;
+  }
+}
+
+@media all and (max-width: 680px) {
+  #postViewer {
+    min-width: 100%;
+  }
+  #postList {
+    max-width: 99%;
+  }
+  .postDesc {
+    width: 90%;
+    min-width: 295px;
+  }
+}
+
+@media all and (max-width: 550px) {
+  .postDesc {
+    width: 98%;
+    margin: 50px 0 25px 0;
+  }
+  .postDesc>aside {
+    text-align: left;
+    white-space: nowrap;
+    padding: 0;
+    top: -46px;
+    right: 0;
+    left: 0;
+    width: 96px;
+    height: auto;
+    border-radius: 4px 4px 0 0;
+  }
+  .postDesc>aside>div {
+    text-align: center;
+    display: inline-block;
+    margin: 4px 2px 4px 2px;
+  }
+  .postDesc>aside>div:first-of-type {
+    margin: 4px 2px 4px 4px;
+  }
+}

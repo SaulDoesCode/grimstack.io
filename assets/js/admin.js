@@ -257,10 +257,16 @@ rilti.app('grimstack')((hub, cache, local) => {
 
   dom('[ui="preview"]').then(el => ctxbound(el, 'edit', '#ui'))
 
-  const WritersBlock = dom.main({
-    id: 'writersblock',
+  const Editor = dom.main({
+    render: 'body',
+    id: 'editor',
     class: 'flex-centered',
-    render: 'body'
+  })
+
+  const WritersBlock = div({
+    class: 'flex-centered',
+    id: 'writersblock',
+    render: Editor,
   })
 
   const titleBlock = header({
@@ -278,6 +284,33 @@ rilti.app('grimstack')((hub, cache, local) => {
       contenteditable: true
     }
   }, 'Markdown Writ Content')
+
+  const writingButtons = aside({
+    render: WritersBlock,
+    class: 'wr-buttons flex-centered',
+  })
+
+  const wrBtn = (icon, title, event, toggle = false, state = false, activeColor = '#fca136') => button({
+    class: `roundcorners flex-centered ${icon} ${state ? 'active' : ''}`,
+    render: writingButtons,
+    attr: {title},
+    css: {
+      color: toggle && state ? activeColor : ''
+    },
+    on: {
+      click(e, el) {
+        Class(el, 'active', toggle && (state = !state))
+        el.style.color = toggle && state ? activeColor : ''
+        hub.emit(event, el, state, e)
+      },
+    }
+  })
+
+  wrBtn('grm-cancel', 'clear editor', 'clearEditor')
+  wrBtn('grm-eye', 'set pubslished state', 'setPublished', true)
+  wrBtn('grm-tag', 'change tags', 'changeTags')
+  wrBtn('grm-floppy', 'save', 'saveWrit')
+  wrBtn('grm-trash', 'delete writ', 'deleteWrit')
 
 
   const savePost = async data => {

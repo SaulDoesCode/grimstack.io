@@ -9,7 +9,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   }
   window.hub = hub
 
-  const {dom, domfn, each, extend, on, once, run, render, isDef,isNil, isStr, isObj, isFunc, isInt, isNode, isMounted} = rilti
+  const {dom, domfn, each, extend, on, once, run, render, isArr, isDef, isBool,isNil, isStr, isObj, isFunc, isInt, isNode, isMounted} = rilti
   const {aside, article, button, div, span, header, section, input, query, h1, h2, h3, h4} = dom
   const {Class, hasClass, append, remove, attr, css} = domfn
 
@@ -154,26 +154,16 @@ rilti.app('grimstack')((hub, cache, local) => {
     })
   })
 
-  const getPosts = async () => {
-    const posts = await runQuery(`FOR post IN posts RETURN post`)
-    console.log(posts)
-  }
-
   const Contexts = {
     edit: {
       hash: '#/edit',
       color: '#E3DAC9',
-      text: 'edit mode'
+      text: 'writing mode'
     },
-    preview: {
-      hash: '#/preview',
-      color: 'hsl(39,80%,75%)',
-      text: 'preview mode'
-    },
-    publish: {
-      hash: '#/publish',
-      color: 'hsl(153,77%,53%)',
-      text: 'publishing mode'
+    postlist: {
+      hash: '#/postlist',
+      color: 'hsl(0,79%,75%)',
+      text: 'postlist'
     },
     users: {
       hash: '#/users/',
@@ -237,31 +227,111 @@ rilti.app('grimstack')((hub, cache, local) => {
     if (!hub.ctxName) hub.ctx('edit')
   })
 
-  const publishBtn = div({
-    render: '#ui',
+  const newWritBtn = div({
+    id: 'newWritBtn',
+    class: 'grm-magic',
+    attr: {
+      ui: 'postlist',
+      title: 'new writ'
+    },
+    on: {
+      click: hub.emit.newWrit
+    }
+  })
+
+  ctxbound(newWritBtn, 'postlist', '#ui')
+
+  const postlistBtn = div({
     id: 'publishBtn',
     class: 'grm-newspaper',
     attr: {
-      ui: 'edit',
-      title: 'publish writ'
+      ui: 'newWrit',
+      title: 'view postlist'
     },
     on: {
-      click: hub.emit.publish
+      click: hub.emit.postlist
     }
   })
-  ctxbound(publishBtn, 'edit', '#ui')
+  ctxbound(postlistBtn, 'edit', '#ui')
 
-  hub.on.publish(() => {
-    hub.ctx('publish')
+  hub.on.postlist(() => {
+    hub.ctx('postlist')
   })
 
-  dom('[ui="preview"]').then(el => ctxbound(el, 'edit', '#ui'))
+
+  const postlistMain = dom.main({
+    class: 'flex-centered',
+  })
+  ctxbound(postlistMain, 'postlist', 'body')
+
+  const postlist = div({
+    id: 'postlist',
+    class: 'flex-centered',
+    render: postlistMain,
+  })
+
+  const Posts = new Map
+
+  const populateList = async (list, listmap, type) => {
+    const writs = await runQuery(`FOR writ IN ${type} RETURN writ`)
+    if (writs.err) return hub.err(writs.err)
+
+    listmap.clear()
+    list.innerHTML = ''
+
+    each(writs, writ => {
+
+      listmap.set(writ._key, writs)
+
+      div({
+        class: 'writ roundcorners flex-centered',
+        render: list,
+        on: {
+          click() {
+            hub.emit.edit(writ, type)
+          }
+        }
+      },
+        dom.h2(writ.title),
+        (() => {
+          let proplist = section({
+            class: 'roundcorners flex-centered',
+          })
+
+          each(writ, (val, key) => {
+            if (['markdown', 'description', 'content', '_id', '_rev', 'likes', 'title'].includes(key)) return
+            if (key === 'date') val = new Date(val).toLocaleDateString()
+            append(
+              proplist,
+              div({
+                class: 'writ-prop roundcorners',
+              },
+                dom.b(`${key}:  `),
+                isArr(val) ?
+                val.map((v, i) => [
+                  span(key === 'edits' ? new Date(v).toLocaleDateString() : v),
+                  (i !== val.length - 1) ? ', ' : ''
+                ]) : val
+              )
+            )
+
+          })
+          return proplist
+        })()
+      )
+
+    })
+  }
+
+  hub.on.updatePostlist(() => {
+    populateList(postlist, Posts, 'posts')
+  })
 
   const Editor = dom.main({
-    render: 'body',
     id: 'editor',
     class: 'flex-centered',
   })
+  ctxbound(Editor, 'edit', 'body')
 
   const WritersBlock = div({
     class: 'flex-centered',
@@ -272,67 +342,258 @@ rilti.app('grimstack')((hub, cache, local) => {
   const titleBlock = header({
     id: 'titleblock',
     render: WritersBlock,
-    attr: {
-      contenteditable: true
-    }
+    attr: {contenteditable: true}
   }, 'Writ Title')
+
+  const mdHolder = dom.pre({
+    attr: {contenteditable: true}
+  })
+
+  const descriptionEditor = div({
+    attr: {contenteditable: true}
+  })
 
   const writingBlock = article({
     id: 'writingblock',
-    render: WritersBlock,
-    attr: {
-      contenteditable: true
-    }
-  }, 'Markdown Writ Content')
+    on: {
+      keydown(e) {
+        if (e.ctrlKey && e.keyCode === 83) {
+          e.preventDefault()
+          hub.emit.saveWrit()
+        }
+      }
+    },
+    render: WritersBlock
+  },
+    mdHolder,
+    dom.hr(),
+    descriptionEditor
+  )
 
   const writingButtons = aside({
     render: WritersBlock,
     class: 'wr-buttons flex-centered',
   })
 
-  const wrBtn = (icon, title, event, toggle = false, state = false, activeColor = '#fca136') => button({
+  const tagMaker = div({
+    class: 'tagMaker pop-in roundcorners',
+  })
+
+  const tagInput = input({
+    on: {
+      keydown({keyCode}) {
+        if (keyCode === 13) {
+          hub.emit.changeTags(false)
+          tagsBtn.$state(false)
+        }
+      }
+    },
+    render: tagMaker
+  })
+
+  const tagSubmit = button({
+    render: tagMaker,
+    on: {
+      click() {
+        hub.emit.changeTags(false)
+        tagsBtn.$state(false)
+      }
+    }
+  }, 'enter')
+
+  const wrBtn = ({icon, title, event, toggle = false, color = '#fca136', dblclick = false, altIcon, state = false}) => button({
     class: `roundcorners flex-centered ${icon} ${state ? 'active' : ''}`,
     render: writingButtons,
     attr: {title},
-    css: {
-      color: toggle && state ? activeColor : ''
+    props: {
+      clickCount: 0,
+      $state(val) {
+        if(isBool(val)) {
+          state = val
+          Class(this, 'active', toggle && state)
+          this.style.color = toggle && state ? color : ''
+          if (altIcon) {
+            Class(this, {
+              [icon]: state,
+              [altIcon]: !state
+            })
+          }
+        }
+        return state
+      }
     },
-    on: {
-      click(e, el) {
-        Class(el, 'active', toggle && (state = !state))
-        el.style.color = toggle && state ? activeColor : ''
-        hub.emit(event, el, state, e)
-      },
+    css: {
+      color: toggle && state ? color : ''
+    },
+    lifecycle: {
+      create(el) {
+        on[dblclick ? 'dblclick' : 'click'](el, e => {
+            el.$state(!state)
+            hub.emit(event, state, el, e)
+            if (dblclick) {
+              Class(el, 'dblclick-active', true)
+              setTimeout(() => Class(el, 'dblclick-active'), 2000)
+            }
+        })
+      }
     }
   })
 
-  wrBtn('grm-cancel', 'clear editor', 'clearEditor')
-  wrBtn('grm-eye', 'set pubslished state', 'setPublished', true)
-  wrBtn('grm-tag', 'change tags', 'changeTags')
-  wrBtn('grm-floppy', 'save', 'saveWrit')
-  wrBtn('grm-trash', 'delete writ', 'deleteWrit')
+  wrBtn({
+    icon: 'grm-trash',
+    title: 'delete writ',
+    event: 'deleteWrit',
+    dblclick: true,
+  })
+  wrBtn({
+    icon: 'grm-floppy',
+    title: 'save',
+    event: 'saveWrit',
+  })
+  const publishBtn = wrBtn({
+    icon: 'grm-eye',
+    title: 'set pubslished state',
+    event: 'setPublished',
+    toggle: true,
+  })
+  const tagsBtn = wrBtn({
+    icon: 'grm-tag',
+    title: 'change tags',
+    event: 'changeTags',
+    toggle: true,
+    color: '#9e8a62'
+  })
+  wrBtn({
+    icon:'grm-cancel',
+    title: 'clear editor',
+    event: 'clearEditor'
+  })
 
+  hub.on.changeTags(state => {
+    state ? render(tagMaker, 'body') : remove(tagMaker)
+  })
 
-  const savePost = async data => {
-    if (isNil(data.key)) data.key = ''
+  const extractWrit = (writ = hub.activeWrit || {}) => {
+    writ.title = titleBlock.textContent.trim()
+    writ.slug = slugify(writ.title)
+    writ.markdown = mdHolder.textContent
+    writ.content = md.makeHtml(writ.markdown).trim()
+    writ.description = descriptionEditor.textContent.trim()
+    if (isNil(writ.author)) writ.author = local('username')
+    if (isNil(writ.published)) writ.published = publishBtn.$state()
+    writ.tags = tagInput.value.split(',').map(tag => tag.trim())
+    if (writ._key === hub.activeWrit._key) cache.activeWrit = hub.activeWrit = writ
+    return writ
+  }
+
+  const editWrit = (writ, writType = 'posts') => {
+    if (isStr(writ)) writ = JSON.parse(writ)
+    titleBlock.textContent = writ.title
+    mdHolder.textContent = writ.markdown
+    descriptionEditor.textContent = writ.description
+    tagInput.value = writ.tags.map((tag, i) => tag + ((i !== writ.tags.length - 1) ? ',' : '')).join('')
+    publishBtn.$state(writ.published)
+    cache.activeWrit.then(w => {
+      if (w._key !== writ._key) cache.lastActiveWrit = hub.lastActiveWrit = w
+    }, () => {})
+    hub.activeWrit = cache.activeWrit = writ
+    hub.activeWritType = 'posts'
+    hub.ctx('edit')
+  }
+
+  const clearEditor = () => {
+    if (hub.activeWrit) hub.lastActiveWrit = cache.lastActiveWrit = extractWrit(hub.activeWrit)
+    hub.activeWrit = {}
+
+    titleBlock.textContent = 'add a title'
+    mdHolder.textContent = 'add some content using markdown'
+    descriptionEditor.textContent = 'add a description'
+    publishBtn.$state(false)
+    tagInput.value = ''
+    hub.ctx('postlist')
+  }
+
+  hub.on.clearEditor(clearEditor)
+  hub.on.edit(editWrit)
+  cache.activeWrit.then(editWrit, () => {})
+  setInterval(() => {
+    if (!rilti.isEmpty(hub.activeWrit)) {
+      extractWrit(hub.activeWrit)
+    }
+  }, 5000)
+
+  hub.on.newWrit(() => {
+    clearEditor()
+    hub.ctx('edit')
+  })
+
+  hub.on.saveWrit(() => {
+    saveWrit(hub.activeWritType, cache.activeWrit = extractWrit(hub.activeWrit))
+    console.log('writ saved!')
+    hub.emit.updatePostlist()
+  })
+
+  hub.on.deleteWrit(() => {
+    cache.lastDeletedWrit = hub.activeWrit
+    runQuery(`
+      FOR writ IN ${hub.activeWritType}
+      FILTER writ._key == @key
+      REMOVE writ IN ${hub.activeWritType}`, {
+        key: hub.activeWrit._key
+     })
+    .then(hub.info.bind(null, 'writ publish state updated: '+hub.activeWrit.title), hub.err)
+    hub.emit.updatePostlist()
+    hub.ctx('postlist')
+  })
+
+  hub.restoreLastDeletedWrit = () => {
+    cache.lastDeletedWrit.then(hub.emit.edit, hub.err)
+  }
+
+  hub.on.setPublished(state => {
+    hub.activeWrit.published = state
+    runQuery(`
+      FOR writ IN ${hub.activeWritType}
+      FILTER writ._key == @key
+      UPDATE writ WITH {published: @state} IN ${hub.activeWritType}
+    `, {key: hub.activeWrit._key, state}).then(hub.info.bind(null, 'writ publish state updated: '+hub.activeWrit.title), hub.err)
+    hub.emit.updatePostlist()
+  })
+
+  hub.emit.updatePostlist()
+
+  const saveWrit = async (writType, data) => {
+    if (isNil(data._key)) data._key = ''
     if (isNil(data.slug)) data.slug = slugify(data.title)
     if (isNil(data.content)) data.content = md.makeHtml(data.markdown)
     if (isNil(data.author)) data.author = local('username')
     if (isNil(data.published)) data.published = false
     if (isNil(data.tags)) data.tags = ['meta']
-    data.description = md.makeHtml(data.description)
+    data.description
 
     const existingPosts = await runQuery(`
-      FOR post IN posts
-      FILTER post.title == @title || post.markdown == @markdown
-      RETURN post
+      FOR writ IN ${writType}
+      FILTER writ.title == @title || writ.markdown == @markdown
+      RETURN writ
     `, {
       title: data.title,
       markdown: data.markdown
     })
 
-    if (existingPosts.length) data.key = existingPosts[0]._key
+    if (existingPosts.length) data._key = existingPosts[0]._key
     console.log(existingPosts)
+
+    const bindVars = {
+      title: data.title,
+      slug: data.slug,
+      key: data._key,
+      markdown: data.markdown,
+      content: data.content,
+      description: data.description,
+      tags: data.tags,
+      published: data.published,
+      author: data.author,
+    }
 
     const query = `
     UPSERT {_key: @key}
@@ -359,8 +620,10 @@ rilti.app('grimstack')((hub, cache, local) => {
       tags: @tags,
       published: @published,
 			edits: APPEND(OLD.edits, [DATE_NOW()], true)
-		} IN posts`
-    runQuery(query, data).then(hub.info.bind(null, 'saved post: '+data.title))
+		} IN ${writType}`
+    runQuery(query, bindVars).then(hub.info.bind(null, 'saved writ: '+data.title), hub.err)
+
+    setTimeout(hub.emit.updatePostlist, 100)
   }
 
 

@@ -35,6 +35,14 @@ body {
   transition: background-color 200ms ease-in;
 }
 
+hr {
+  display: block;
+  width: 80%;
+  margin: 25px auto;
+  border: none;
+  border-bottom: 1px solid hsl(0, 0%, 50%);
+}
+
 @keyframes grimstack-pulse {
   0% {
     text-shadow: 0 0 1px #E3DAC9;

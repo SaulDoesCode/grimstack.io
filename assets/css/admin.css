@@ -9,13 +9,20 @@
   border: 1px solid hsla(0,0%,50%,.4);
 }
 
+#editor {
+  position: relative;
+  display: block;
+  margin: 10px auto;
+}
+
 #writersblock {
+  box-sizing: content-box;
   display: inline-flex;
-  width: 800px;
-  max-width: 96%;
+  width: 95%;
+  max-width: 800px;
   height: auto;
-  margin: 20px 40px 20px 0;
-  padding: 0 0 20px 0;
+  margin: 46px 0 20px 0;
+  padding: 0 0 20px 20px;
   border-radius: 2px;
   background: rgb(227, 218, 201);
   color: hsl(0,0%,30%);
@@ -23,19 +30,34 @@
 
 #titleblock {
   display: inline-block;
-  padding: 0 20px 0 20px;
   margin: 20px 0 20px 0;
   width: 100%;
-  font-size: 2.5em;
+  font-size: 2.3em;
   text-align: left;
   border-right: 3px solid hsl(0,0%,25%);
+}
+
+#writingblock {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: auto;
+  font-size: 1.25em;
+  line-height: 1.4;
+  text-align: left;
+  border-right: 3px solid hsl(0,0%,25%);
+}
+
+#writingblock > pre {
+  font-family: inherit;
 }
 
 .wr-buttons {
   position: absolute;
   height: auto;
-  left: 100%;
-  top: 0;
+  right: 0;
+  bottom: 100%;
+  flex-direction: row;
 }
 
 .wr-buttons > button {
@@ -49,4 +71,80 @@
   margin: 0 0 5px 5px;
   width: 30px;
   height:30px;
+  transition: all 160ms ease-in;
+}
+
+.wr-buttons > button.active, .wr-buttons > button:hover {
+  text-shadow: 0 1px 3px hsla(0,0%,0%,.24);
+}
+
+.wr-buttons > .dblclick-active {
+  background: hsl(36,100%,54%);
+  color: #fff;
+}
+
+#postlist {
+  margin: 20px auto;
+}
+
+.writ > h2 {
+  margin: 0 auto 15px auto;
+}
+
+.writ {
+  margin: 14px;
+  max-width: 80%;
+  padding: 10px;
+  background: hsl(0,0%,15%);
+}
+
+.writ > section {
+  position: relative;
+  display: inline-block;
+  text-align: left;
+  max-width: 95%;
+}
+
+.writ-prop {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  background: hsl(0,0%,20%);
+  margin: 0 4px 5px 4px;
+  padding: 4px 6px 4px 6px;
+}
+
+.tagMaker {
+  position: fixed;
+  bottom: 50%;
+  left: calc(50% - 150px);
+  width: 300px;
+  height: auto;
+  padding: 10px;
+  border-radius: 4px;
+  background: hsl(0,0%,15%);
+  box-shadow: 0 2px 6px hsla(0,0%,0%,.25);
+}
+
+.tagMaker > * {
+  border: none;
+  outline: none;
+  padding: 6px;
+  margin: 5px;
+}
+
+.tagMaker > input {
+  width: 95%;
+}
+
+.tagMaker > button {
+  background: hsl(0,0%,30%);
+}
+
+.tagMaker > button {
+  cursor: pointer;
+  border-radius: 4px;
+  background: hsl(0,0%,25%);
+  color: #fff;
+  transition: 140ms ease;
 }

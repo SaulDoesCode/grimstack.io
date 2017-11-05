@@ -301,6 +301,8 @@ rilti.app('grimstack')((hub, cache, local) => {
           each(writ, (val, key) => {
             if (['markdown', 'description', 'content', '_id', '_rev', 'likes', 'title'].includes(key)) return
             if (key === 'date') val = new Date(val).toLocaleDateString()
+            if (key === 'edits' && val.length > 3) val = val.slice(val.length - 3, val.length)
+
             append(
               proplist,
               div({
@@ -348,6 +350,9 @@ rilti.app('grimstack')((hub, cache, local) => {
   const mdHolder = dom.pre({
     attr: {contenteditable: true}
   })
+  hub.mded = mdHolder
+  hub.md = md
+  hub.xmd = () => md.makeHtml(mdHolder.innerText)
 
   const descriptionEditor = div({
     attr: {contenteditable: true}
@@ -414,8 +419,8 @@ rilti.app('grimstack')((hub, cache, local) => {
           this.style.color = toggle && state ? color : ''
           if (altIcon) {
             Class(this, {
-              [icon]: state,
-              [altIcon]: !state
+              [icon]: state === true,
+              [altIcon]: state === false
             })
           }
         }
@@ -470,13 +475,23 @@ rilti.app('grimstack')((hub, cache, local) => {
   })
 
   hub.on.changeTags(state => {
-    state ? render(tagMaker, 'body') : remove(tagMaker)
+    if (state) return render(tagMaker, 'body')
+    remove(tagMaker)
+    const {_key:key, tags, title} = extractWrit(hub.activeWrit)
+    runQuery(`
+      FOR writ IN ${hub.activeWritType}
+      FILTER writ._key == @key
+      UPDATE writ WITH {tags: @tags} IN ${hub.activeWritType}`,
+      {key, tags}
+    )
+    .then(hub.info.bind(null, 'writ publish state updated: '+title), hub.err)
+    hub.emit.updatePostlist()
   })
 
   const extractWrit = (writ = hub.activeWrit || {}) => {
     writ.title = titleBlock.textContent.trim()
     writ.slug = slugify(writ.title)
-    writ.markdown = mdHolder.textContent
+    writ.markdown = mdHolder.innerText
     writ.content = md.makeHtml(writ.markdown).trim()
     writ.description = descriptionEditor.textContent.trim()
     if (isNil(writ.author)) writ.author = local('username')
@@ -676,7 +691,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   a cosmic ocean glows bright green
   with anguish and euphoria
   upon its pristine surface
-  enless bodies float waywardly
+  endless bodies float waywardly
   on their way to way through
   the veil that separates
   modality from form

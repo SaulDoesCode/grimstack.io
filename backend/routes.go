@@ -141,7 +141,9 @@ func initRoutes() {
 				return JSONErr(c, 400, "/writ - invalid slug, fix it and try again")
 			}
 
-			data, err = GetWritBySlug(slug, writType)
+			alreadySeen := body.Get("alreadySeen").Bool()
+
+			data, err = GetWritBySlug(slug, writType, !alreadySeen)
 			if err != nil {
 				return JSONErr(c, 404, "/writ - "+slug+" couldn't any posts with that slug")
 			}

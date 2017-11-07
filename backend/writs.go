@@ -89,13 +89,18 @@ func GetWritDescBySlug(slug string, writType string) ([]byte, error) {
 	return writJSON, err
 }
 
-func GetWritBySlug(slug string, writType string) ([]byte, error) {
+func GetWritBySlug(slug string, writType string, shouldUpdateViewCount bool) ([]byte, error) {
 	var writJSON []byte
+	updateViewCount := ""
+	if shouldUpdateViewCount {
+		updateViewCount = `UPDATE writ WITH { viewCount: writ.viewCount + 1 } IN `+writType
+	}
+
 	data, err := runQuery(`
 		FOR writ IN `+writType+`
 		FILTER writ.published == true && writ.slug == @slug
 		LIMIT 1
-		UPDATE writ WITH { viewCount: writ.viewCount + 1 } IN `+writType+`
+		`+updateViewCount+`
 		RETURN UNSET(writ, "_id", "_rev", "edits", "description", "likes", "published", "markdown")
 	`, obj{
 		"slug": slug,

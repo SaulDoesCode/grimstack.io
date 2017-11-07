@@ -9,7 +9,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   }
   window.hub = hub
 
-  const {dom, domfn, each, extend, on, once, run, render, isArr, isDef, isBool,isNil, isStr, isObj, isFunc, isInt, isNode, isMounted} = rilti
+  const {dom, domfn, each, extend, on, once, run, render, isArr, isDef, isBool, isNil, isStr, isObj, isFunc, isInt, isNode, isMounted} = rilti
   const {aside, article, button, div, span, header, section, input, query, h1, h2, h3, h4} = dom
   const {Class, hasClass, append, remove, attr, css} = domfn
 
@@ -258,44 +258,50 @@ rilti.app('grimstack')((hub, cache, local) => {
     hub.ctx('postlist')
   })
 
-
   const postlistMain = dom.main({
-    class: 'flex-centered',
+    class: 'flex-centered'
   })
   ctxbound(postlistMain, 'postlist', 'body')
 
   const postlist = div({
     id: 'postlist',
     class: 'flex-centered',
-    render: postlistMain,
+    render: postlistMain
   })
 
-  const Posts = new Map
+  const Posts = new Map()
 
-  const populateList = async (list, listmap, type) => {
-    const writs = await runQuery(`FOR writ IN ${type} RETURN writ`)
+  const populateList = async (list, listmap, writType) => {
+    const writs = await runQuery(`
+      FOR writ IN ${writType}
+      SORT writ.date DESC
+      RETURN writ
+    `)
     if (writs.err) return hub.err(writs.err)
 
     listmap.clear()
     list.innerHTML = ''
 
     each(writs, writ => {
-
       listmap.set(writ._key, writs)
 
       div({
-        class: 'writ roundcorners flex-centered',
+        class: 'writ roundcorners',
         render: list,
-        on: {
-          click() {
-            hub.emit.edit(writ, type)
-          }
-        }
       },
-        dom.h2(writ.title),
+        header(writType),
+        dom.h2({
+          on: {
+            click () {
+              hub.emit.edit(writ, writType)
+            }
+          }
+        },
+          writ.title
+        ),
         (() => {
           let proplist = section({
-            class: 'roundcorners flex-centered',
+            class: 'roundcorners flex-centered'
           })
 
           each(writ, (val, key) => {
@@ -303,25 +309,21 @@ rilti.app('grimstack')((hub, cache, local) => {
             if (key === 'date') val = new Date(val).toLocaleDateString()
             if (key === 'edits' && val.length > 3) val = val.slice(val.length - 3, val.length)
 
-            append(
-              proplist,
-              div({
-                class: 'writ-prop roundcorners',
-              },
-                dom.b(`${key}:  `),
-                isArr(val) ?
-                val.map((v, i) => [
-                  span(key === 'edits' ? new Date(v).toLocaleDateString() : v),
-                  (i !== val.length - 1) ? ', ' : ''
-                ]) : val
-              )
+            div({
+              class: 'writ-prop roundcorners',
+              render: proplist
+            },
+              dom.b(`${key}:  `),
+              isArr(val) ?
+              val.map((v, i) => [
+                span(key === 'edits' ? new Date(v).toLocaleDateString() : v),
+                (i !== val.length - 1) ? ', ' : ''
+              ]) : val
             )
-
           })
           return proplist
         })()
       )
-
     })
   }
 
@@ -331,14 +333,14 @@ rilti.app('grimstack')((hub, cache, local) => {
 
   const Editor = dom.main({
     id: 'editor',
-    class: 'flex-centered',
+    class: 'flex-centered'
   })
   ctxbound(Editor, 'edit', 'body')
 
   const WritersBlock = div({
     class: 'flex-centered',
     id: 'writersblock',
-    render: Editor,
+    render: Editor
   })
 
   const titleBlock = header({
@@ -361,7 +363,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   const writingBlock = article({
     id: 'writingblock',
     on: {
-      keydown(e) {
+      keydown (e) {
         if (e.ctrlKey && e.keyCode === 83) {
           e.preventDefault()
           hub.emit.saveWrit()
@@ -377,16 +379,16 @@ rilti.app('grimstack')((hub, cache, local) => {
 
   const writingButtons = aside({
     render: WritersBlock,
-    class: 'wr-buttons flex-centered',
+    class: 'wr-buttons flex-centered'
   })
 
   const tagMaker = div({
-    class: 'tagMaker pop-in roundcorners',
+    class: 'tagMaker pop-in roundcorners'
   })
 
   const tagInput = input({
     on: {
-      keydown({keyCode}) {
+      keydown ({keyCode}) {
         if (keyCode === 13) {
           hub.emit.changeTags(false)
           tagsBtn.$state(false)
@@ -399,7 +401,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   const tagSubmit = button({
     render: tagMaker,
     on: {
-      click() {
+      click () {
         hub.emit.changeTags(false)
         tagsBtn.$state(false)
       }
@@ -412,8 +414,8 @@ rilti.app('grimstack')((hub, cache, local) => {
     attr: {title},
     props: {
       clickCount: 0,
-      $state(val) {
-        if(isBool(val)) {
+      $state (val) {
+        if (isBool(val)) {
           state = val
           Class(this, 'active', toggle && state)
           this.style.color = toggle && state ? color : ''
@@ -431,14 +433,14 @@ rilti.app('grimstack')((hub, cache, local) => {
       color: toggle && state ? color : ''
     },
     lifecycle: {
-      create(el) {
+      create (el) {
         on[dblclick ? 'dblclick' : 'click'](el, e => {
-            el.$state(!state)
-            hub.emit(event, state, el, e)
-            if (dblclick) {
-              Class(el, 'dblclick-active', true)
-              setTimeout(() => Class(el, 'dblclick-active'), 2000)
-            }
+          el.$state(!state)
+          hub.emit(event, state, el, e)
+          if (dblclick) {
+            Class(el, 'dblclick-active', true)
+            setTimeout(() => Class(el, 'dblclick-active'), 2000)
+          }
         })
       }
     }
@@ -448,18 +450,18 @@ rilti.app('grimstack')((hub, cache, local) => {
     icon: 'grm-trash',
     title: 'delete writ',
     event: 'deleteWrit',
-    dblclick: true,
+    dblclick: true
   })
   wrBtn({
     icon: 'grm-floppy',
     title: 'save',
-    event: 'saveWrit',
+    event: 'saveWrit'
   })
   const publishBtn = wrBtn({
     icon: 'grm-eye',
     title: 'set pubslished state',
     event: 'setPublished',
-    toggle: true,
+    toggle: true
   })
   const tagsBtn = wrBtn({
     icon: 'grm-tag',
@@ -469,7 +471,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     color: '#9e8a62'
   })
   wrBtn({
-    icon:'grm-cancel',
+    icon: 'grm-cancel',
     title: 'clear editor',
     event: 'clearEditor'
   })
@@ -477,14 +479,14 @@ rilti.app('grimstack')((hub, cache, local) => {
   hub.on.changeTags(state => {
     if (state) return render(tagMaker, 'body')
     remove(tagMaker)
-    const {_key:key, tags, title} = extractWrit(hub.activeWrit)
+    const {_key: key, tags, title} = extractWrit(hub.activeWrit)
     runQuery(`
       FOR writ IN ${hub.activeWritType}
       FILTER writ._key == @key
       UPDATE writ WITH {tags: @tags} IN ${hub.activeWritType}`,
       {key, tags}
     )
-    .then(hub.info.bind(null, 'writ publish state updated: '+title), hub.err)
+    .then(hub.info.bind(null, 'writ publish state updated: ' + title), hub.err)
     hub.emit.updatePostlist()
   })
 
@@ -530,7 +532,13 @@ rilti.app('grimstack')((hub, cache, local) => {
 
   hub.on.clearEditor(clearEditor)
   hub.on.edit(editWrit)
-  cache.activeWrit.then(editWrit, () => {})
+
+  cache.activeWrit.then(writ => {
+    const ctx = hub.ctxName
+    editWrit(writ)
+    if (ctx !== 'edit') hub.ctx(ctx)
+  }, () => {})
+
   setInterval(() => {
     if (!rilti.isEmpty(hub.activeWrit)) {
       extractWrit(hub.activeWrit)
@@ -555,8 +563,8 @@ rilti.app('grimstack')((hub, cache, local) => {
       FILTER writ._key == @key
       REMOVE writ IN ${hub.activeWritType}`, {
         key: hub.activeWrit._key
-     })
-    .then(hub.info.bind(null, 'writ publish state updated: '+hub.activeWrit.title), hub.err)
+      })
+    .then(hub.info.bind(null, 'writ publish state updated: ' + hub.activeWrit.title), hub.err)
     hub.emit.updatePostlist()
     hub.ctx('postlist')
   })
@@ -571,32 +579,36 @@ rilti.app('grimstack')((hub, cache, local) => {
       FOR writ IN ${hub.activeWritType}
       FILTER writ._key == @key
       UPDATE writ WITH {published: @state} IN ${hub.activeWritType}
-    `, {key: hub.activeWrit._key, state}).then(hub.info.bind(null, 'writ publish state updated: '+hub.activeWrit.title), hub.err)
+    `, {key: hub.activeWrit._key, state}).then(hub.info.bind(null, 'writ publish state updated: ' + hub.activeWrit.title), hub.err)
     hub.emit.updatePostlist()
   })
 
   hub.emit.updatePostlist()
 
   const saveWrit = async (writType, data) => {
-    if (isNil(data._key)) data._key = ''
     if (isNil(data.slug)) data.slug = slugify(data.title)
     if (isNil(data.content)) data.content = md.makeHtml(data.markdown)
     if (isNil(data.author)) data.author = local('username')
     if (isNil(data.published)) data.published = false
     if (isNil(data.tags)) data.tags = ['meta']
-    data.description
 
-    const existingPosts = await runQuery(`
-      FOR writ IN ${writType}
-      FILTER writ.title == @title || writ.markdown == @markdown
-      RETURN writ
-    `, {
-      title: data.title,
-      markdown: data.markdown
-    })
+    if (isNil(data._key)) {
+      const existingPosts = await runQuery(`
+        FOR writ IN ${writType}
+        FILTER writ.title == @title || writ.markdown == @markdown
+        RETURN writ
+      `, {
+        title: data.title,
+        markdown: data.markdown
+      })
 
-    if (existingPosts.length) data._key = existingPosts[0]._key
-    console.log(existingPosts)
+      if (existingPosts.length) {
+        data._key = existingPosts[0]._key
+        console.log('writ exists, updating...', existingPosts)
+      } else {
+        data._key = ''
+      }
+    }
 
     const bindVars = {
       title: data.title,
@@ -607,7 +619,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       description: data.description,
       tags: data.tags,
       published: data.published,
-      author: data.author,
+      author: data.author
     }
 
     const query = `
@@ -636,11 +648,10 @@ rilti.app('grimstack')((hub, cache, local) => {
       published: @published,
 			edits: APPEND(OLD.edits, [DATE_NOW()], true)
 		} IN ${writType}`
-    runQuery(query, bindVars).then(hub.info.bind(null, 'saved writ: '+data.title), hub.err)
+    runQuery(query, bindVars).then(hub.info.bind(null, 'saved writ: ' + data.title), hub.err)
 
     setTimeout(hub.emit.updatePostlist, 100)
   }
-
 
   /*
   Journey to the sands of elsewhere

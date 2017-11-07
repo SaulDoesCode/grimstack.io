@@ -25,7 +25,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     render: 'body',
   })
 
-  const notify = (mode, closeAfter = 7000, onclose) => (...msg) => {
+  const notify = (mode, closeAfter = 12000, onclose) => (...msg) => {
 
     const notification = section({
       class: 'notify flex-centered '+mode,
@@ -54,7 +54,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     (
       html(
         `<b>grimstack uses cookies</b> to cache some resources
-        <small>(css, icons, auth tokens)</small> and settings, hope that\'s ok.
+        <small>(css, icons, auth tokens)</small>, hope that\'s ok.
         Privacy is important and we don't intend to compromise yours,
         the only metrics collected by this site are views and likes`
       )
@@ -144,7 +144,15 @@ rilti.app('grimstack')((hub, cache, local) => {
   const testCondition = condition => (isFunc(condition) ? condition() : condition) === true
 
   const ctxbound = (el, ctx, target = 'body', condition = true) => {
-    const checkCtx = name => name === ctx && testCondition(condition) ? render(el, target) : remove(el)
+    const checkCtx = name => {
+      if (name === ctx && testCondition(condition)) {
+        hub.emit[`ctxMount:${name}`](el, name)
+        render(el, target)
+      } else {
+        hub.emit[`ctxUnmount:${name}`](el, name)
+        remove(el)
+      }
+    }
     hub.ctx(checkCtx)
     checkCtx(hub.ctxName)
   }
@@ -243,6 +251,8 @@ rilti.app('grimstack')((hub, cache, local) => {
   )
   ctxbound(postlist, 'home')
 
+  const LoadingHTML = `<div class="grm-spin4 flex-centered"></div><br>Loading...`
+
   const link = (href, inner, className = '') => dom.a({className, attr: {href}}, inner)
 
   const timeDate = date => time(timeago().format(new Date(date)))
@@ -253,13 +263,16 @@ rilti.app('grimstack')((hub, cache, local) => {
     route(href, async () => {
       try {
         if (!data.content) {
+          let alreadySeen = !!local(_key)
+          pvContent.innerHTML = LoadingHTML
 
-          const pdata = await fetchWrits('slug', {slug})
+          const pdata = await fetchWrits('slug', {slug, alreadySeen})
 
           if (!pdata) throw new Error('server/database error')
           data.content = pdata.content
-          vcount.textContent = fancyNum(data.viewCount = pdata.viewCount + 1)
+          vcount.textContent = fancyNum(data.viewCount = alreadySeen ? pdata.viewCount : (pdata.viewCount + 1))
           lcount.textContent = fancyNum(data.likeCount = pdata.likeCount)
+          alreadySeen = local(_key, true)
         }
         run(() => hub.emit.showPost(data))
       } catch(e) {
@@ -314,11 +327,11 @@ rilti.app('grimstack')((hub, cache, local) => {
         div(html(description)),
       ),
       footer(
-        div({class: 'grm-tag tags'}, tags.map((tag, i) => [span({class: 'tag'}, tag), (i !== tags.length - 1) ? ',' : ''])),
+        div({class: 'grm-tag tags'}, tags.map(tag => span({class: 'tag'}, tag))),
         div({class: 'grm-feather details'}, timeDate(date), span(author))
       )
     )
-  }
+}
 
   let oldPostListPage;
   hub.$set('postListPage', async page => {
@@ -343,7 +356,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   },
     'Post title'
   )
-  const pvContent = article('Post content')
+  const pvContent = article(html(LoadingHTML))
   const pvAuthor = span('Author')
   const pvDate = time('11/11/17')
   const pvTags = div({
@@ -372,6 +385,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   )
 
   ctxbound(postViewer, 'post')
+
   hub.on.showPost(({title, content, date, tags, viewcount, likecount, author}) => {
     if (pvTitle.textContent != title) {
       pvTitle.textContent = title
@@ -397,8 +411,16 @@ rilti.app('grimstack')((hub, cache, local) => {
     .then(res => res.json())
     .then(data => {
       if (data.err || data.errors) {
-        console.warn(data)
+        console.warn(data.err)
         hub.isAuthorized = false
+        const usrname = local("username")
+        if (usrname) {
+          hub.err(`
+            Sorry${' '+usrname}, we were unable to authenticate your session,
+            your auth token must have expired or perhaps you've logged in somewhere else.
+            If you want to, just login again
+          `)
+        }
         localStorage.clear()
         return
       }

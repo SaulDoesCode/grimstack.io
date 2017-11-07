@@ -45,9 +45,11 @@ hr {
 
 @keyframes grimstack-pulse {
   0% {
+    background: hsl(0,0%,7%);
     text-shadow: 0 0 1px #E3DAC9;
   }
   100% {
+    background: hsl(0,0%,14%);
     text-shadow: 0 0 8px #E3DAC9;
   }
 }
@@ -201,11 +203,17 @@ hr {
   left: 10px;
   top: 10px;
   font-size: 3em;
-  background: hsl(0,0%,7%);
+  background: hsl(0,0%,8%);
   color: hsl(0,0%,21%);
-  text-shadow: 0 0 2px hsl(0,0%,0%);
+  text-shadow: 0 0 1px #E3DAC9;
   box-shadow: inset 0 0 5px hsl(0,0%,0%);
+  transition: all 160ms ease-in;
   z-index: 10;
+}
+
+#grimstack:hover {
+  animation: 1s ease-in grimstack-pulse alternate infinite;
+  box-shadow: inset 0 0 12px hsla(0,0%,0%,.75);
 }
 
 #ui {

@@ -177,11 +177,8 @@ func echoServeMemfile(filename string) func(c ctx) error {
 func serveMemfile(res http.ResponseWriter, req *http.Request, memfile MemFile) {
 	res.Header().Set("Etag", memfile.ETag)
 	//c.Response().Header().Set("Cache-Control", "public, max-age=3600, must-revalidate")
-	if DevMode {
-		res.Header().Set("Cache-Control", "private, must-revalidate")
-	} else {
-		res.Header().Set("Cache-Control", "private, max-age=600, must-revalidate")
-	}
+	//res.Header().Set("Cache-Control", "private, must-revalidate")
+	res.Header().Set("Cache-Control", "private, max-age=150, must-revalidate")
 	res.Header().Set("Content-Type", memfile.ContentType)
 	res.Header().Set("Vary", "Accept-Encoding")
 

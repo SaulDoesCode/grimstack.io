@@ -3,8 +3,13 @@ package grimstack
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/tidwall/gjson"
+)
+
+var (
+	indexHTML = "/index.html"
 )
 
 type DataService struct {
@@ -82,6 +87,36 @@ func serviceMaker(service DataService) error {
 }
 
 func initRoutes() {
+
+	Server.GET("/", func(c ctx) (err error) {
+		pusher, ok := c.Response().Writer.(http.Pusher)
+		if ok {
+			if err = pusher.Push("/js/localforage.min.js", nil); err != nil {
+				return err
+			}
+			if err = pusher.Push("/js/rilti.min.js", nil); err != nil {
+				return err
+			}
+			if err = pusher.Push("/js/rilti-model.min.js", nil); err != nil {
+				return err
+			}
+			if err = pusher.Push("/js/rilti-app.min.js", nil); err != nil {
+				return err
+			}
+			if err = pusher.Push("/js/timeago.min.js", nil); err != nil {
+				return err
+			}
+			if err = pusher.Push("/js/site.js", nil); err != nil {
+				return err
+			}
+			if err = pusher.Push("/css/site.css", nil); err != nil {
+				return err
+			}
+		}
+		memfile, _ := MemCached[indexHTML]
+		serveMemfile(c.Response().Writer, c.Request(), memfile)
+		return nil
+	})
 
 	Server.POST("/writ", func(c ctx) error {
 		body, err := JSONbody(c)

@@ -207,11 +207,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   const fetchWrits = async (req, props = {}, writtype = 'posts') => (await
     (await fetch('/writ', {
       method:'POST',
-      body: JSON.stringify(Object.assign({
-        req,
-        writtype,
-        token: hub.token,
-      }, props))
+      body: JSON.stringify(Object.assign({req, writtype, token}, props))
     }))
     .json()
   )
@@ -336,11 +332,13 @@ rilti.app('grimstack')((hub, cache, local) => {
   let oldPostListPage;
   hub.$set('postListPage', async page => {
     if (page !== oldPostListPage) {
-      if (page < 1) return hub.postListPage = 1
+      if (page < 0) return hub.postListPage = 0
       try {
         const posts = await fetchWrits('desc', {page})
-
-        if (posts.err) return hub.warn("Could not fetch posts, there's probably not enough posts written yet")
+        if (posts.err) {
+          console.warn(posts)
+          return hub.warn("Could not fetch posts, there's probably not enough posts written yet")
+        }
         dom.queryEach('.postDesc', el => remove(el))
         each(posts, postDesc)
       } catch (e) {
@@ -349,7 +347,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       oldPostListPage = page
     }
   })
-  hub.postListPage = 1
+  hub.postListPage = 0
 
   const pvTitle = header({
     class: 'pvTitle'
@@ -593,8 +591,7 @@ rilti.app('grimstack')((hub, cache, local) => {
 
   const B64flag = 'data:image/jpeg;base64,'
   const gravatarIcon = async (code, username) => {
-    if (!code) return false
-    if (!username) return false
+    if (!code || !username) return false
     const data = await cache.resource(`https://www.gravatar.com/avatar/${code}.jpg`, 'arrayBuffer')
 
     hub.profileImg = B64flag + rilti.arrayBufferToB64(data)

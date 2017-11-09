@@ -141,13 +141,7 @@ func initRoutes() {
 			if !pagenum.Exists() {
 				return JSONErr(c, 400, "/writ - invalid page number")
 			}
-			page := pagenum.Int()
-
-			if page <= 1 {
-				page = 0
-			} else {
-				page = page * 5
-			}
+			page := pagenum.Int() * 5
 
 			if req == "desc" {
 

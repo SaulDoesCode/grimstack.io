@@ -226,13 +226,22 @@ rilti.app('grimstack')((hub, cache, local) => {
       class: 'pager'
     },
       div({
+        lifecycle: {
+          mount(el) {
+            const visibleIfPage1orMore = (page = hub.postListPage) => css(el, {
+              display: page < 1 ? 'none' : '',
+            })
+            visibleIfPage1orMore()
+            hub.$set('postListPage', () => visibleIfPage1orMore())
+          }
+        },
         on: {
           click() {
             if (hub.postListPage > 0) hub.postListPage--
           }
         }
       },
-        "Previous"
+        "Newer"
       ),
       div({
         on: {
@@ -241,7 +250,7 @@ rilti.app('grimstack')((hub, cache, local) => {
           }
         }
       },
-        "Next"
+        "Older"
       )
     )
   )
@@ -270,7 +279,9 @@ rilti.app('grimstack')((hub, cache, local) => {
           lcount.textContent = fancyNum(data.likeCount = pdata.likeCount)
           alreadySeen = local(_key, true)
         }
-        run(() => hub.emit.showPost(data))
+        run(() => {
+          hub.emit.showPost(hub.activeWrit = data)
+        })
       } catch(e) {
         console.error('Could not fetch post content: ', e)
       }
@@ -373,18 +384,117 @@ rilti.app('grimstack')((hub, cache, local) => {
       class: 'pvHead'
     },
       pvTitle,
-      dom.br(),
-      div({class: 'details'}, pvDate, pvAuthor)
     ),
     dom.br(),
     pvContent,
     dom.br(),
-    footer(pvTags)
+    footer(
+      div({class: 'details'}, pvDate, pvAuthor),
+      dom.br(),
+      pvTags
+    ),
+    dom.hr(),
+    dom.br()
   )
 
   ctxbound(postViewer, 'post')
 
-  hub.on.showPost(({title, content, date, tags, viewcount, likecount, author}) => {
+
+  const commentBuilder = section({
+    class: 'commentBuilder roundcorners',
+    render: postViewer
+  })
+
+  const commentList = section({
+    class: 'commentList flex-centered',
+    render: postViewer
+  })
+
+  run(async () => {
+    const src = await hub.async.profileImg
+    if (src) {
+      commentBuilder.prepend(
+        dom.img({
+          class: 'roundcorners',
+          css: {
+            width: '40px',
+            height: '40px'
+          },
+          src
+        })
+      )
+    }
+  })
+
+  const submitComment = dom.button({
+    render: commentBuilder,
+    class: 'roundcorners',
+    on: {
+      click: hub.emit.newComment,
+    }
+  }, 'submit')
+
+  const commentContent = dom.textarea({
+    class: 'commentContent',
+    render: commentBuilder,
+    attr: {
+      placeholder: 'add a comment...',
+      maxlength: '1200',
+      autocomplete: 'false',
+      spellcheck: 'true',
+    }
+  })
+
+  const buildComment = (username, date, content) => {
+    let img = ''
+    if (hub.profileImg) {
+      img = dom.img({
+        class: 'roundcorners',
+        css: {
+          width: '40px',
+          height: '40px',
+        },
+        src: hub.profileImg
+      })
+    }
+
+    article({
+      class: 'comment roundcorners',
+      render: commentList,
+    },
+      header(
+        img,
+        span(username),
+        time(timeago().format(new Date(date)))
+      ),
+      dom.p({
+        class: 'roundcorners',
+      },
+        dom.text(content)
+      )
+    )
+  }
+
+  hub.on.newComment(async () => {
+    if (hub.activeWrit && token) {
+      const writID = hub.activeWrit._key
+      if (!writID || writID === '') return hub.err('active writ id missing, could not make comment')
+      const content = commentContent.value.trim()
+      if (!content || content === '') return hub.warn('comment content needs some substance first')
+      const data = await (
+        await fetch(`/comment/create/${writID}`, {
+          method: 'POST',
+          body: JSON.stringify({content, token})
+        })
+      ).json()
+      if (data.err) return hub.err(data.err)
+      buildComment(data.username, data.date, data.content || content)
+      remove(commentBuilder)
+    }
+  })
+
+
+  hub.on.showPost(async ({title, content, date, tags, viewcount, likecount, author, _key}) => {
     if (pvTitle.textContent != title) {
       pvTitle.textContent = title
       pvDate.textContent = timeago().format(new Date(date))
@@ -395,7 +505,18 @@ rilti.app('grimstack')((hub, cache, local) => {
       pvAuthor.textContent = author
       pvContent.innerHTML = content
       pvTags.innerHTML = ''
+      commentList.innerHTML = ''
       append(pvTags, tags.map(tag => span({class: 'tag'}, tag)))
+
+      const data = (await (await fetch(`/comments/${_key}/${0}`)).json())
+      if (!data.err) {
+        each(data, ({username, date, content}) => {
+          buildComment(username, date, content)
+        })
+      } else {
+        console.log(data)
+      }
+
     }
   })
 

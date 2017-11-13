@@ -132,13 +132,13 @@ rilti.app('grimstack')((hub, cache, local) => {
     const p = new RegExp(a.split('').join('|'), 'g')
 
     return txt => txt.toString().toLowerCase()
-  .replace(/\s+/g, '-')      // Replace spaces with -
-  .replace(p, c => b.charAt(a.indexOf(c)))  // Replace special chars
-  .replace(/&/g, '-and-')    // Replace & with 'and'
-  .replace(/[^\w-]+/g, '')   // Remove all non-word chars
-  .replace(/--+/g, '-')      // Replace multiple - with single -
-  .replace(/^-+/, '')        // Trim - from start of text
-  .replace(/-+$/, '')        // Trim - from end of text
+    .replace(/\s+/g, '-')
+    .replace(p, c => b.charAt(a.indexOf(c)))
+    .replace(/&/g, '-and-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
   })()
 
   const runQuery = hub.Q = (query, bindvars = {}) => new Promise((resolve, reject) => {
@@ -653,144 +653,4 @@ rilti.app('grimstack')((hub, cache, local) => {
     setTimeout(hub.emit.updatePostlist, 100)
   }
 
-  /*
-
-  Stone-Portance
-
-  Once from credence departed, the intemperance of certainty departs also;
-  let now the light of life's triumph over inertness gleam forth even amidst the vast abyss,
-  the voracity of which threatens all that is good in being and time.
-  Thus I beg...
-
-  Stand triumphant you, upon your ball of shit!
-  Though it may have a stank so wretched as to rob one of both vision and breath
-  it is this, yes this, that is the glory of the human spirit.
-
-  Let that wretched mass be yours and yours truely;
-  may you stand with it and stand forthright
-  for if you bear it and do not refute it
-  and choose willingly to refine it
-  then t'will be your achor of brilliance.
-
-  But for it, you would need the strength of three,
-  one to hold, a second to roar, and, a third to laugh upon it all.
-
-  May you embrace that wickedness of gaining by letting go,
-  knowing full well that holding only adds to the burden of being
-  whilst defiance in the face of loss makes you wealthy in spirit.
-
-  Do not fear impermanence like the many too many,
-  realize that the waning of one's time is but the waxing of another's.
-  Let those who come benefit from your being,
-  for though you may be forgotten and go unoticed,
-  what you are in every moment sounds forth echoeing into eternity,
-  so too your words and your actions are forever written in the book of time;
-
-  to be experienced by those whom you will never know,
-  live for them and do not undermine them by undermining
-  the beauty in being and soiling life's sacred recursion.
-
-  The value of a stone is either the use of its form, or, the story it holds.
-  Stand in your form like the stone, strong and full of life eternal,
-  useful those who would see your value,
-  yet vulnerable to the forces of time and change
-  only in so much that your core undermines the integrity of your form;
-  though inevitably form too will wear out beyond its usefulness
-  so as not to impede the progress of eternity.
-
-  Thus look to the stone that lasted three billion years to tell
-  the tale of earth's becoming, become that stone and have
-  your verse in the book of time.
-
-  I wish only that it is a verse worth retelling.
-
-
-
-
-
-  Journey to the sands of elsewhere
-  29/10/2017
-
-  time died as a single rust colored tear fell into the fine dry sand below
-  it doesn't look the way I thought it would
-  a second fell, it's forever now
-
-  I've dreamt of these sweet soft sands
-  soon their tender touch will carress my broken soul
-  and embrace me the way life's indifference never could
-  the answers have had their show and outstayed their welcome
-
-  a muddy clump is forming now
-
-  I don't feel anymore, that left when my becoming came undone
-  my love did not die when I heard them laugh
-  it did not die when they listened, nodded and promptly forgot
-  nor when they saw my anguish and let me carry their's
-  it died when they took my heart and danced with it
-  teasing me with false courtesy and rude affection like an ugly whore
-  gleefully whispering in my ear in no words at all, that,
-  geniality is a luxury the world cannot afford to spare one so contorted as you
-
-  a strange slippery heat kisses my skin, it's comforting
-  I was vain to think that any of it ever mattered
-  a coldness grows over my neck and back, it hurts so bad
-  it won't be long now, my face is pressed against the soft sands
-  no I can't take it back, I must not take it back
-
-  so sore now, the sand is cold and sticky
-  I didn't want this, I don't mean it
-  I can't move, I can't move
-  I can't scream
-  ...
-  bitter metal taste, all numb now
-  ...
-  empty now, alone now
-  ...
-  my beautiful wrong sentimental song starts to play...
-  ...
-  play and play...
-  ...
-
-  Drifting to Sublation
-
-  a cosmic ocean glows bright green
-  with anguish and euphoria
-  upon its pristine surface
-  endless bodies float waywardly
-  on their way to way through
-  the veil that separates
-  modality from form
-  transparent now
-  they are fragile and beautiful
-  their faults shine in them
-  as clumps of large priceless emeralds
-  even a slight stiring will
-  break their forms apart
-  before they disolve naturally
-  into the calm luke warm water
-  releasing their jewels to the depths
-  from which a bright light shines
-  the insane light of eternity
-  digesting order with the sap of time
-
-  he has fallen into a rut again and he cannot help himself
-  he sighs loathingly once again expressing his repugnance at the world and himself
-  it sprays finely like foul piss in the wind, it's everybody's problem now
-  he holds his head again like some craven thrall cursing behind its master's back
-  he closes his eyes and forgives himself again, breathing in that sweet piss like perfume
-  then smokes another ciggarette to finish the sacred ritual
-  he is so wretched aleady, but he wears that tough guy suit right over his victimhood
-  he's insensitive, right, and wholly oppressed
-  you say something but he just pisses more then blames you for the ungodly stench
-  he claims his innocence with such ham and candor
-  that you could swear he was an altar boy fucked by the priest
-  this is his great fuck you stand, and you're in the way
-  he sighs again spreading that terrible sickness
-  then closes his eyes and forgives himself
-  the rot is so deep, he hurts, you know, he hurts, but he's too proud
-  that wound festers away, but he bears it and blames the world for his pain
-  should you say something he'd bark at you then sigh forgiving himself
-  he's screaming inside and there's nothing to be done
-  I sigh and forgive myself
-  */
 })

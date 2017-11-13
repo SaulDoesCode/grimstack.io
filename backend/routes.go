@@ -2,8 +2,10 @@ package grimstack
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/tidwall/gjson"
 )
@@ -182,6 +184,71 @@ func initRoutes() {
 		return c.JSONBlob(200, data)
 	})
 
+	Server.POST("/comment/:action/:writID", UserOnlyRoute(ulvlUser, func(c ctx, user User, body gjson.Result) error {
+
+		action := c.Param("action")
+		if action == "" {
+			return JSONErr(c, 400, "bad request, no action parameter provided")
+		}
+
+		writID := c.Param("writID")
+		if writID == "" {
+			return JSONErr(c, 400, "bad comment request, no writID provided")
+		}
+
+		if action == "edit" || action == "create" {
+
+			content := body.Get("content").String()
+			if content == "" {
+				return JSONErr(c, 400, "bad comment request, no content provided")
+			}
+
+			var comment obj
+			var err error
+
+			if action == "edit" || action == "remove" {
+				key := body.Get("key").String()
+				if key != "" {
+
+					if action == "remove" {
+						err = RemoveComment(key, user.Username)
+					} else if action == "edit" {
+						comment, err = EditComment(key, user.Username, content)
+					}
+
+				} else {
+					err = errors.New("invalid comment key/id")
+				}
+
+			} else if action == "create" {
+				comment, err = CommentOnWrit(user.Username, writID, content)
+			}
+
+			if err != nil {
+				return JSONErr(c, 500, err.Error())
+			}
+			return c.JSON(200, comment)
+		}
+
+		return JSONErr(c, 500, "something went wrong, could not process comment request")
+	}))
+
+	Server.GET("/comments/:writID/:page", func(c ctx) error {
+		writID := c.Param("writID")
+		pagenum, interr := strconv.Atoi(c.Param("page"))
+		if interr != nil {
+			return JSONErr(c, 400, "/comments/:writID/:page - invalid page number")
+		}
+		page := int64(pagenum * 5)
+
+		data, err := GetWritComments(page, writID)
+		if err != nil {
+			return JSONErr(c, 500, "could not retrieve writ comments, please check that request params are correct")
+		}
+
+		return c.JSON(200, data)
+	})
+
 	Server.GET("/u/:username", func(c ctx) error {
 		username := c.Param("username")
 		if validUsername(username) != nil {
@@ -248,9 +315,7 @@ func initRoutes() {
 							localStorage.setItem('username', '`+user.Username+`');
 							localStorage.setItem('gravatar', '`+user.EmailMD5+`');
 							console.log('Authentication Success: ', '`+user.ActiveToken+`');
-							setTimeout(() => {
-								location.replace('/');
-							}, 5);
+							setTimeout(function () { location.replace('/'); }, 5);
 						</script>
 					</head>
 				</html>`)

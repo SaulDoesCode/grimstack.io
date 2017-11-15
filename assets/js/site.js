@@ -25,8 +25,8 @@ rilti.app('grimstack')((hub, cache, local) => {
     render: 'body',
   })
 
-  const notify = (mode, closeAfter = 12000, onclose) => (...msg) => {
-
+  const notify = (mode, closeAfter = 10000, onclose) => (msg, altTime) => {
+    if (altTime) closeAfter = altTime
     const notification = section({
       class: 'notify flex-centered '+mode,
       render: notifications,
@@ -40,7 +40,7 @@ rilti.app('grimstack')((hub, cache, local) => {
           }
         }
       }),
-      span(msg)
+      span(html(msg))
     )
 
     if (isInt(closeAfter)) remove(notification, closeAfter)
@@ -291,7 +291,9 @@ rilti.app('grimstack')((hub, cache, local) => {
       class: 'grm-thumbs-up likecount',
       on: {
         click() {
-          hub.emit('like:'+slug)
+          if (hub.isAuthorized) return hub.emit('like:'+slug)
+          //hub.ctx('account')
+          hub.info('need to be logged in to like something', 4000)
         }
       }
     },
@@ -329,13 +331,13 @@ rilti.app('grimstack')((hub, cache, local) => {
       render: postlist
     },
       link(href, header(title)),
-      aside(lcount, vcount),
+      aside({class: 'flex-centered'}, lcount, vcount),
       section(
         div(html(description)),
       ),
       footer(
-        div({class: 'grm-tag tags'}, tags.map(tag => span({class: 'tag'}, tag))),
-        div({class: 'grm-feather details'}, timeDate(date), span(author))
+        div({class: 'grm-feather details'}, timeDate(date), span(author)),
+        div({class: 'grm-tag tags'}, tags.map(tag => span({class: 'tag'}, tag)))
       )
     )
 }
@@ -389,7 +391,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     pvContent,
     dom.br(),
     footer(
-      div({class: 'details'}, pvDate, pvAuthor),
+      div({class: 'details grm-feather'}, pvDate, pvAuthor),
       dom.br(),
       pvTags
     ),
@@ -659,22 +661,26 @@ rilti.app('grimstack')((hub, cache, local) => {
     hub.authmode = state ? 'login' : 'signup'
   })
 
-  const submit = dom.button({
-    class : 'pop-in',
-    on: {
-      click() {
-        const details = formData()
-        if (validForm(details)) {
-          authform.innerHTML = '<div class="grm-spin4"></div><br>Sending...'
-          if (hub.authmode === 'login') delete details.username
-          hub.emit.submitAuth(details)
-        }
-      }
-    }
-  }, 'Go!')
-
   hub.$set('authmode', mode => {
     mode === 'login' ? remove(usernameInput) : render(usernameInput, emailInput, 'before')
+  })
+
+  const submitAuth = () => {
+    const details = formData()
+    if (validForm(details)) {
+      authform.innerHTML = '<div class="grm-spin4"></div><br>Sending...'
+      if (hub.authmode === 'login') delete details.username
+      hub.emit.submitAuth(details)
+    }
+  }
+
+  const submit = dom.button({
+    class : 'pop-in',
+    on: { click: submitAuth }
+  }, 'Go!')
+
+  on.keyup(emailInput, ({keyCode}) => {
+    if (keyCode === 13) submitAuth()
   })
 
   const authform = dom.main({

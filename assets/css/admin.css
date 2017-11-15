@@ -19,7 +19,7 @@
   box-sizing: content-box;
   display: inline-flex;
   width: 95%;
-  max-width: 840px;
+  max-width: 940px;
   height: auto;
   margin: 46px 0 20px 0;
   padding: 0 0 20px 20px;
@@ -42,6 +42,7 @@
   display: inline-block;
   width: 100%;
   height: auto;
+  padding-right: 20px;
   font-size: 1.25em;
   line-height: 1.4;
   text-align: left;

@@ -121,7 +121,7 @@ func GetPersonalizedWritList(page int, username string, writType string) ([]byte
 		FOR writ IN `+writType+`
 		FILTER writ.published == true
 		SORT writ.date DESC
-		LIMIT @offset, 5
+		LIMIT @offset, 6
 		LET doesLike = @username IN writ.likes
 		RETURN MERGE(UNSET(writ, "_id", "_rev", "edits", "content", "published", "likes", "markdown"), {doesLike})
 	`, obj{
@@ -145,7 +145,7 @@ func GetWritList(page int64, writType string) ([]byte, error) {
 		FOR writ IN `+writType+`
 		FILTER writ.published == true
 		SORT writ.date DESC
-		LIMIT @offset, 5
+		LIMIT @offset, 6
 		RETURN UNSET(writ, "_id", "_rev", "edits", "content", "published", "likes", "markdown")
 	`, obj{
 		"offset": page,
@@ -167,7 +167,7 @@ func GetFullWritList(page int64, writType string) ([]byte, error) {
 		FOR writ IN `+writType+`
 		FILTER writ.published == true
 		SORT writ.date DESC
-		LIMIT @offset, 5
+		LIMIT @offset, 6
 		RETURN UNSET(writ, "_id", "_rev", "edits", "description", "published", "likes", "markdown")
 	`, obj{
 		"offset": page,
@@ -208,7 +208,7 @@ func GetWritsByTag(tag string, page int64, writType string) ([]byte, error) {
 		FOR writ IN `+writType+`
 		FILTER writ.published == true && @tag IN writ.tags
 		SORT writ.date DESC
-		LIMIT @offset, 5
+		LIMIT @offset, 6
 		RETURN UNSET(writ, "_id", "_rev", "edits", "content", "published", "likes", "markdown")
 	`, obj{
 		"offset": page,
@@ -231,7 +231,7 @@ func GetPersonalizedWritsByTag(tag string, page int, username string, writType s
 		FOR writ IN `+writType+`
 		FILTER writ.published == true && @tag IN writ.tags
 		SORT writ.date DESC
-		LIMIT @offset, 5
+		LIMIT @offset, 6
 		LET doesLike = @username IN writ.likes
 		RETURN MERGE(UNSET(writ, "_id", "_rev", "edits", "content", "published", "likes", "markdown"), {doesLike})
 	`, obj{

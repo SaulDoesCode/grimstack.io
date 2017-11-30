@@ -90,30 +90,25 @@ func serviceMaker(service DataService) error {
 
 func initRoutes() {
 
+	pushAssets := []string{
+		"/js/localforage.min.js",
+		"/js/rilti.min.js",
+		"/js/rilti-app.min.js",
+		"/js/timeago.min.js",
+		"/js/site.js",
+		"/css/site.css",
+	}
+
 	Server.GET("/", func(c ctx) (err error) {
-		pusher, ok := c.Response().Writer.(http.Pusher)
-		if ok {
-			if err = pusher.Push("/js/localforage.min.js", nil); err != nil {
-				return err
-			}
-			if err = pusher.Push("/js/rilti.min.js", nil); err != nil {
-				return err
-			}
-			if err = pusher.Push("/js/rilti-app.min.js", nil); err != nil {
-				return err
-			}
-			if err = pusher.Push("/js/timeago.min.js", nil); err != nil {
-				return err
-			}
-			if err = pusher.Push("/js/site.js", nil); err != nil {
-				return err
-			}
-			if err = pusher.Push("/css/site.css", nil); err != nil {
-				return err
+		responseWriter := c.Response().Writer
+
+		if pusher, ok := responseWriter.(http.Pusher); ok {
+			for _, pushAsset := range pushAssets {
+				pusher.Push(pushAsset, nil)
 			}
 		}
 
-		return MFI.Serve(c.Response().Writer, c.Request(), indexHTML)
+		return MFI.Serve(responseWriter, c.Request(), indexHTML)
 	})
 
 	Server.POST("/writ", func(c ctx) error {

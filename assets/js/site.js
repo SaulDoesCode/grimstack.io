@@ -1,5 +1,5 @@
 rilti.app('grimstack')((hub, cache, local) => {
-  const {dom, domfn, each, model, route, run, render, once, on, isMounted,isStr, isInt, isFunc} = rilti
+  const {dom, domfn, each, model, route, run, render, once, on, isMounted, isStr, isInt, isFunc} = rilti
   const {div, span, header, h1, h2, h3, section, aside, article, footer, input, time, html} = dom
   const {attr, hasAttr, hasClass, Class, css, append, prepend, remove, removeNodes} = domfn
   window.hub = hub
@@ -10,7 +10,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     num >= 1e9 ? (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'g' :
     num >= 1e6 ? (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'm' :
     num >= 1e3 ? (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'k' :
-    ''+num
+    '' + num
   )
 
   const details = (summary, content, options = {}) => dom.details(
@@ -22,19 +22,19 @@ rilti.app('grimstack')((hub, cache, local) => {
   const notifications = div({
     id: 'notifications',
     class: 'flex-centered',
-    render: 'body',
+    render: 'body'
   })
 
   const notify = (mode, closeAfter = 10000, onclose) => (msg, altTime) => {
     if (altTime) closeAfter = altTime
     const notification = section({
-      class: 'notify flex-centered '+mode,
-      render: notifications,
+      class: 'notify flex-centered ' + mode,
+      render: notifications
     },
       span({
         class: 'close grm-cancel roundcorners flex-centered',
         on: {
-          click() {
+          click () {
             remove(notification)
             if (isFunc(onclose)) onclose()
           }
@@ -47,11 +47,10 @@ rilti.app('grimstack')((hub, cache, local) => {
   }
   hub.warn = notify('warn')
   hub.info = notify('info')
-  hub.err  = notify('err')
+  hub.err = notify('err')
 
   if (!local('cookieInfo')) {
-    notify('cookie', false, () => local('cookieInfo', true))
-    (
+    notify('cookie', false, () => local('cookieInfo', true))(
       html(
         `<b>grimstack uses cookies</b> to cache some resources
         <small>(css, icons, auth tokens)</small>, hope that\'s ok.
@@ -65,13 +64,14 @@ rilti.app('grimstack')((hub, cache, local) => {
     const tglr = span({class: 'middle'})
     left = span({class: 'left'}, left)
     right = span({class: 'right'}, right)
+
     const el = div({
       class: 'toggle',
       props: {
-        get state() {
+        get state () {
           return hasClass(el, 'active')
         },
-        set state(val) {
+        set state (val) {
           val = !!val
           Class(el, 'active', val)
           css(left, {
@@ -89,7 +89,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       span({
         class: 'back',
         on: {
-          click() {
+          click () {
             el.state = !el.state
             if (fn) fn(el.state)
           }
@@ -97,8 +97,9 @@ rilti.app('grimstack')((hub, cache, local) => {
       },
         tglr
       ),
-      right,
+      right
     )
+
     el.state = false
     return el
   }
@@ -107,7 +108,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     run(() => {
       if (isMounted(el)) {
         const {width} = el.getBoundingClientRect()
-        css(el, {left: `calc(50% - ${width/2}px)`})
+        css(el, {left: `calc(50% - ${width / 2}px)`})
       }
     })
   }
@@ -135,7 +136,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       const ctx = (hub.activeContext = Contexts[hub.ctxName = v])
       if (location.hash.slice(0, ctx.hash.length) !== ctx.hash) location.hash = ctx.hash
       hub.emit.ctx(v, ctx)
-    } else if(isFunc(v)) {
+    } else if (isFunc(v)) {
       return hub.on.ctx(v)
     }
     return hub.activeContext
@@ -168,7 +169,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   const closeCtx = div({
     class: 'closeCtx grm-cancel',
     attr: {
-      title: 'close',
+      title: 'close'
     }
   })
 
@@ -180,7 +181,6 @@ rilti.app('grimstack')((hub, cache, local) => {
       hub.ctx('home')
     })
     hub.ctx((name, {text, color}) => {
-
       if (name !== 'home') {
         render(closeCtx, ctx_el, 'before')
       } else {
@@ -206,14 +206,14 @@ rilti.app('grimstack')((hub, cache, local) => {
 
   const fetchWrits = async (req, props = {}, writtype = 'posts') => (await
     (await fetch('/writ', {
-      method:'POST',
+      method: 'POST',
       body: JSON.stringify(Object.assign({req, writtype, token}, props))
     }))
     .json()
   )
 
   const postlist = dom.main({
-    id: 'postList',
+    id: 'postList'
   },
     header({
       css: {
@@ -227,30 +227,30 @@ rilti.app('grimstack')((hub, cache, local) => {
     },
       div({
         lifecycle: {
-          mount(el) {
+          mount (el) {
             const visibleIfPage1orMore = (page = hub.postListPage) => css(el, {
-              display: page < 1 ? 'none' : '',
+              display: page < 1 ? 'none' : ''
             })
             visibleIfPage1orMore()
-            hub.$set('postListPage', () => visibleIfPage1orMore())
+            hub.on('set:postListPage', () => visibleIfPage1orMore())
           }
         },
         on: {
-          click() {
+          click () {
             if (hub.postListPage > 0) hub.postListPage--
           }
         }
       },
-        "Newer"
+        'Newer'
       ),
       div({
         on: {
-          click() {
+          click () {
             hub.postListPage++
           }
         }
       },
-        "Older"
+        'Older'
       )
     )
   )
@@ -282,7 +282,7 @@ rilti.app('grimstack')((hub, cache, local) => {
         run(() => {
           hub.emit.showPost(hub.activeWrit = data)
         })
-      } catch(e) {
+      } catch (e) {
         console.error('Could not fetch post content: ', e)
       }
     })
@@ -290,9 +290,9 @@ rilti.app('grimstack')((hub, cache, local) => {
     const lcount = div({
       class: 'grm-thumbs-up likecount',
       on: {
-        click() {
-          if (hub.isAuthorized) return hub.emit('like:'+slug)
-          //hub.ctx('account')
+        click () {
+          if (hub.isAuthorized) return hub.emit('like:' + slug)
+          // hub.ctx('account')
           hub.info('need to be logged in to like something', 4000)
         }
       }
@@ -306,7 +306,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       fancyNum(viewCount)
     )
 
-    hub.on('like:'+slug, () => {
+    hub.on('like:' + slug, () => {
       fetch('/like', {
         method: 'POST',
         body: JSON.stringify({
@@ -317,14 +317,13 @@ rilti.app('grimstack')((hub, cache, local) => {
       }).then(res => {
         res.json().then(result => {
           if (result.err) return console.warn(`trouble liking item`, result)
-          if (result.msg === "Success") {
+          if (result.msg === 'Success') {
             lcount.textContent = fancyNum(data.likeCount = result.likecount)
-            Class(lcount, "liked", result.state)
+            Class(lcount, 'liked', result.state)
           }
         })
       })
     })
-
 
     const desc = article({
       class: 'postDesc',
@@ -340,10 +339,10 @@ rilti.app('grimstack')((hub, cache, local) => {
         div({class: 'grm-tag tags'}, tags.map(tag => span({class: 'tag'}, tag)))
       )
     )
-}
+  }
 
-  let oldPostListPage;
-  hub.$set('postListPage', async page => {
+  let oldPostListPage
+  hub.on('set:postListPage', async page => {
     if (page !== oldPostListPage) {
       if (page < 0) return hub.postListPage = 0
       try {
@@ -377,7 +376,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   const postViewer = dom.main({
     id: 'postViewer',
     lifecycle: {
-      destroy() {
+      destroy () {
         location.hash = ''
       }
     }
@@ -400,7 +399,6 @@ rilti.app('grimstack')((hub, cache, local) => {
   )
 
   ctxbound(postViewer, 'post')
-
 
   const commentBuilder = section({
     class: 'commentBuilder roundcorners',
@@ -432,7 +430,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     render: commentBuilder,
     class: 'roundcorners',
     on: {
-      click: hub.emit.newComment,
+      click: hub.emit.newComment
     }
   }, 'submit')
 
@@ -443,7 +441,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       placeholder: 'add a comment...',
       maxlength: '1200',
       autocomplete: 'false',
-      spellcheck: 'true',
+      spellcheck: 'true'
     }
   })
 
@@ -454,7 +452,7 @@ rilti.app('grimstack')((hub, cache, local) => {
         class: 'roundcorners',
         css: {
           width: '40px',
-          height: '40px',
+          height: '40px'
         },
         src: hub.profileImg
       })
@@ -462,7 +460,7 @@ rilti.app('grimstack')((hub, cache, local) => {
 
     article({
       class: 'comment roundcorners',
-      render: commentList,
+      render: commentList
     },
       header(
         img,
@@ -470,7 +468,7 @@ rilti.app('grimstack')((hub, cache, local) => {
         time(timeago().format(new Date(date)))
       ),
       dom.p({
-        class: 'roundcorners',
+        class: 'roundcorners'
       },
         dom.text(content)
       )
@@ -495,7 +493,6 @@ rilti.app('grimstack')((hub, cache, local) => {
     }
   })
 
-
   hub.on.showPost(async ({title, content, date, tags, viewcount, likecount, author, _key}) => {
     if (pvTitle.textContent != title) {
       pvTitle.textContent = title
@@ -518,7 +515,6 @@ rilti.app('grimstack')((hub, cache, local) => {
       } else {
         console.log(data)
       }
-
     }
   })
 
@@ -534,10 +530,10 @@ rilti.app('grimstack')((hub, cache, local) => {
       if (data.err || data.errors) {
         console.warn(data.err)
         hub.isAuthorized = false
-        const usrname = local("username")
+        const usrname = local('username')
         if (usrname) {
           hub.err(`
-            Sorry${' '+usrname}, we were unable to authenticate your session,
+            Sorry${' ' + usrname}, we were unable to authenticate your session,
             your auth token must have expired or perhaps you've logged in somewhere else.
             If you want to, just login again
           `)
@@ -555,7 +551,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     const username = hub.username = localStorage.getItem('username')
     const gravatar = hub.gravatar = localStorage.getItem('gravatar')
     hub.token = token = tkn
-    hub.$set('isAuthorized', state => {
+    hub.on('set:isAuthorized', state => {
       if (state === true) hub.emit.Authenticated({username, gravatar, token})
     })
     testToken()
@@ -615,7 +611,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   ]
 
   const emailInput = input({
-    class : 'pop-in',
+    class: 'pop-in',
     attr: {
       type: 'email',
       name: 'email',
@@ -624,7 +620,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   })
 
   const usernameInput = input({
-    class : 'pop-in',
+    class: 'pop-in',
     attr: {
       type: 'text',
       name: 'username',
@@ -661,7 +657,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     hub.authmode = state ? 'login' : 'signup'
   })
 
-  hub.$set('authmode', mode => {
+  hub.on('set:authmode', mode => {
     mode === 'login' ? remove(usernameInput) : render(usernameInput, emailInput, 'before')
   })
 
@@ -675,7 +671,7 @@ rilti.app('grimstack')((hub, cache, local) => {
   }
 
   const submit = dom.button({
-    class : 'pop-in',
+    class: 'pop-in',
     on: { click: submitAuth }
   }, 'Go!')
 
@@ -684,14 +680,14 @@ rilti.app('grimstack')((hub, cache, local) => {
   })
 
   const authform = dom.main({
-    id: 'authform',
+    id: 'authform'
   },
     authinfo,
     authModeToggle,
     section(usernameInput, emailInput, submit)
   )
   ctxbound(authform, 'account', 'body', () => !hub.isAuthorized)
-  hub.$set('isAuthorized', val => {
+  hub.on('set:isAuthorized', val => {
     if (val) remove(authform)
   })
 
@@ -752,7 +748,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     const logout = div({
       class: 'logout roundcorners flex-centered grm-logout',
       attr: {
-        title: 'logout',
+        title: 'logout'
       },
       on: {
         click: hub.emit.logout
@@ -760,34 +756,34 @@ rilti.app('grimstack')((hub, cache, local) => {
     })
 
     const profile = dom.main({
-      class: 'profile',
+      class: 'profile'
     })
 
     const profileDetails = aside({
       class: 'profileDetails roundcorners flex-centered',
-      render: profile,
+      render: profile
     },
       dom.img({
         class: 'roundcorners',
         lifecycle: {
-          create(el) {
+          create (el) {
             hub.async.profileImg.then(src => el.src = src)
           }
         }
       })
     )
 
-    fetch('/u/'+username)
+    fetch('/u/' + username)
     .then(res => {
       res.json().then(user => {
         console.log(user)
         div({
-            class: 'bio',
-            render: profileDetails,
-          },
+          class: 'bio',
+          render: profileDetails
+        },
           span({
             css: {
-              color: Contexts.account.color,
+              color: Contexts.account.color
             }
           }, 'Bio'),
           user.bio
@@ -798,5 +794,4 @@ rilti.app('grimstack')((hub, cache, local) => {
     ctxbound(logout, 'account', '#ui', () => hub.isAuthorized)
     ctxbound(profile, 'account', 'body', () => hub.isAuthorized)
   })
-
 })

@@ -99,9 +99,6 @@ func initRoutes() {
 			if err = pusher.Push("/js/rilti.min.js", nil); err != nil {
 				return err
 			}
-			if err = pusher.Push("/js/rilti-model.min.js", nil); err != nil {
-				return err
-			}
 			if err = pusher.Push("/js/rilti-app.min.js", nil); err != nil {
 				return err
 			}
@@ -115,9 +112,8 @@ func initRoutes() {
 				return err
 			}
 		}
-		memfile, _ := MemCached[indexHTML]
-		serveMemfile(c.Response().Writer, c.Request(), memfile)
-		return nil
+
+		return MFI.Serve(c.Response().Writer, c.Request(), indexHTML)
 	})
 
 	Server.POST("/writ", func(c ctx) error {

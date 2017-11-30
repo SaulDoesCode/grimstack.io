@@ -2,13 +2,14 @@ package grimstack
 
 import (
 	"path/filepath"
-	"runtime"
 	"time"
 
+	"github.com/SaulDoesCode/echo-memfile"
 	"github.com/labstack/echo/middleware"
 )
 
 var (
+	MFI        memfile.MemFileInstance
 	JWTKey     []byte
 	DevMode    bool
 	DBName     string
@@ -21,7 +22,6 @@ var (
 	HTTPS_Port = ":443"
 	LinkHost   = "grimstack.io"
 	ServerDir  = "./assets/"
-	Platform   = runtime.GOOS
 	EmailConf  = struct {
 		Address  string
 		Server   string
@@ -81,12 +81,13 @@ func Init() {
 	startDBConnection()
 	initRoutes()
 	startEmailer()
-	initMemfiles(Server)
+
+	MFI = memfile.New(Server, ServerDir, DevMode)
 
 	ticker := time.NewTicker(interval)
 	go func() {
 		for range ticker.C {
-			updateMemfiles()
+			MFI.Update()
 			updateVKeys()
 		}
 	}()

@@ -29,7 +29,7 @@ body {
   margin: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Varela Round', 'Nunito', 'Roboto', Helvetica, Arial, sans-serif;
+  font-family: 'Varela Round', Nunito, Roboto, Helvetica, Arial, sans-serif;
   text-align: center;
   background: url("/media/noise.jpg") hsl(0, 0%, 10%) repeat;
   color: hsl(0, 0%, 90%);

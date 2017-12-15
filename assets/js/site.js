@@ -331,9 +331,7 @@ rilti.app('grimstack')((hub, cache, local) => {
     },
       link(href, header(title)),
       aside({class: 'flex-centered'}, lcount, vcount),
-      section(
-        div(html(description)),
-      ),
+      section(div(html(description))),
       footer(
         div({class: 'grm-feather details'}, timeDate(date), span(author)),
         div({class: 'grm-tag tags'}, tags.map(tag => span({class: 'tag'}, tag)))
@@ -381,11 +379,7 @@ rilti.app('grimstack')((hub, cache, local) => {
       }
     }
   },
-    section({
-      class: 'pvHead'
-    },
-      pvTitle,
-    ),
+    section({class: 'pvHead'}, pvTitle),
     dom.br(),
     pvContent,
     dom.br(),

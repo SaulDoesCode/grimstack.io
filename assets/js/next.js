@@ -1,16 +1,16 @@
 {
-  /* global rilti localStorage */
+  /* global rilti localStorage fetch */
   const {
     domfn: {append, hasClass, Class, css},
     dom,
     each,
     model,
     once,
-    isEmpty,
+    isRenderable,
     isBool,
     run
   } = rilti
-  const {aside, div, header} = dom
+  const {article, aside, div, span, html, header, h2, time} = dom
 
   var hub = model()
 
@@ -94,7 +94,7 @@
       view (name, show, view) {
         if (!isBool(show)) [view, show] = [show, false]
         const viewExists = hub.views.has(name)
-        if (isEmpty(view)) {
+        if (!isRenderable(view)) {
           if (!viewExists) return
           hub.lastView = hub.activeView
           hub.activeView = name
@@ -103,7 +103,7 @@
         if (!viewExists) hub.views.set(name, view)
         if (show) {
           main.innerHTML = ''
-          return append(main, view)
+          return main.append(view)
         }
       }
     },
@@ -120,6 +120,7 @@
   hub.on.sbToggle(main.scale)
 
   const page = (name, {view, action}) => {
+    name = name.trim()
     main.view(name, view)
     sidebar.item(name, () => {
       if (action) action(name, view, main)
@@ -131,9 +132,37 @@
   }
   page.show = name => { sidebar.activeItem = name }
 
-  page(`Poems and Writs`, {
-    view: `This is where all the poems and writs will go`
+  const fetchWrits = async (req, props = {}, writtype = 'posts') => (
+    (await fetch('/writ', {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({req, writtype}, props))
+    })).json()
+  )
+
+  fetchWrits('desc', {page: 0}).then(writs => {
+    const view = div({class: 'flexCentered'})
+    each(writs, ({key, title, author, date, description, slug}) => {
+      const loadWrit = async () => {
+        const writ = await fetchWrits('slug', {slug})
+        console.log(writ)
+      }
+
+      article({
+        render: view,
+        class: 'writ flexCentered',
+        on: {click: loadWrit}
+      },
+        header(
+          h2(title),
+          time(new Date(date).toLocaleString()),
+          span(author)
+        ),
+        div(description)
+      )
+    })
+    setTimeout(() => page(`Poems and Writs`, {view}), 80)
   })
+
   page(`Projects`, {
     view: `You will find some of my GitHub Projects and other projects here`
   })

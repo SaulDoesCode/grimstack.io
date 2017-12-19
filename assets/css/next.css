@@ -123,7 +123,7 @@ body {
 
 .sbItem.active {
   border: 2px solid hsla(45, 10%, 10%, .5);
-  background: hsl(0,0%, 99.5%);
+  background: hsl(0, 0%, 99.5%);
   text-decoration: underline;
 }
 
@@ -180,7 +180,7 @@ body {
     flex-wrap: wrap;
     justify-content: space-around;
   }
-  .sidebar > .fancyHeader {
+  .sidebar>.fancyHeader {
     width: 100%;
     margin: 2px auto 8px auto;
   }
@@ -207,7 +207,7 @@ body {
     border: 1px solid hsla(45, 10%, 10%, .05);
     border-bottom: 2px solid hsla(45, 10%, 10%, .5);
   }
-  body > main.contentGrid {
+  body>main.contentGrid {
     height: auto;
     min-height: 85%;
   }

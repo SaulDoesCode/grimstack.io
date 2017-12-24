@@ -1,7 +1,7 @@
 {
   /* global rilti localStorage fetch */
   const {
-    domfn: {append, hasClass, Class, css},
+    domfn: {hasClass, Class, css},
     dom,
     each,
     model,
@@ -132,10 +132,10 @@
   }
   page.show = name => { sidebar.activeItem = name }
 
-  const fetchWrits = async (req, props = {}, writtype = 'posts') => (
+  const fetchWrits = async (req, props = {}) => (
     (await fetch('/writ', {
       method: 'POST',
-      body: JSON.stringify(Object.assign({req, writtype}, props))
+      body: JSON.stringify(Object.assign({req, writtype: 'posts'}, props))
     })).json()
   )
 
@@ -160,7 +160,7 @@
         div(description)
       )
     })
-    setTimeout(() => page(`Poems and Writs`, {view}), 80)
+    page(`Poems and Writs`, {view})
   })
 
   page(`Projects`, {

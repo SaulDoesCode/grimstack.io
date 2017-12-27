@@ -1,7 +1,7 @@
 {
 /* global rilti location */
   const {dom, domfn: {attrToggle, Class, hasClass}, notifier, extend, run, route, isStr, on, once} = rilti
-  const {a, p, header, footer, article, aside, main, nav, section, span, div, h1, img} = dom
+  const {a, p, header, footer, article, main, nav, section, span, div, hr, h1, h4, img, table, tr, td} = dom
 
   const randInt = (min, max) => ~~(Math.random() * (max - min + 1) + min)
 
@@ -93,17 +93,20 @@
         link.onclick = link.activate
         route(link.getAttribute('href'), link.activate)
         run(() => {
-          if (!navRack.active) link.activate()
+          if (!navRack.active) navRack.links[navRack.links.length - 1].activate()
         })
       })
 
-      rilti.on.wheel(head, ({deltaY}) => {
+      rilti.on.wheel(head, e => {
+        e.preventDefault()
         const {links, active} = navRack
         const i = links.indexOf(active)
-        const next = deltaY > 1 ? i + 1 : i - 1
-        if (links[next]) links[next].activate()
-        else if (next >= links.length) links[0].activate()
-        else if (next < 0) links[links.length - 1].activate()
+        let next = e.deltaY > 1 ? i + 1 : i - 1
+        if (!links[next]) {
+          if (next >= links.length) next = 0
+          else if (next < 0) next = links.length - 1
+        }
+        links[next].activate()
       }, true)
     }
   })
@@ -115,16 +118,11 @@
     p(description)
   )
 
-  const skillItem = (name, imageURL) => article({
+  const skillItem = (alt, src) => article({
     class: 'skill-item'
   },
-    img({
-      attr: {
-        src: imageURL,
-        alt: name
-      }
-    }),
-    div(name)
+    img({ attr: { alt, src } }),
+    div(alt)
   )
 
   const views = {
@@ -161,27 +159,64 @@
       skillItem('CSS', '/media/skills/css.png'),
       skillItem('NodeJS', '/media/skills/nodejs.png'),
       skillItem('Golang', '/media/skills/golang.png'),
-      dom.hr()
+      hr()
     ),
     about: section({
       class: 'content-view',
       id: 'about-view'
     },
-      h1('About me'),
       article({
         class: 'self-summary'
       },
-        div(
-          span('Name\t'),
-          `Saul van der Walt`
+        dom.h2('Overview'),
+        p(`
+          Hi, I'm Saul and developing for the Web is my fulltime obsession second only to my love of philosophy.
+          Ever since my first taste of programming at 14
+          I've been tinkering away ever since building everything from simple doodles, golang servers to my own batteries included
+          javascript framework; even this personal site is built with rilti.js and homespun CSS.
+        `),
+        img({
+          attr: {
+            alt: 'Profile Picture of Saul',
+            src: '/media/Saul.jpg'
+          }
+        }),
+        dom.h2('Details'),
+        table(
+          tr(
+            td('Age '),
+            td(new Date().getYear() - new Date('11 April 1997').getYear())
+          ),
+          tr(
+            td('Name '),
+            td('Saul van der Walt')
+          ),
+          tr(
+            td('Nationality '),
+            td('South African')
+          ),
+          tr(
+            td('Skillset'),
+            td('Junior-Mid Web Developer')
+          ),
+          tr(
+            td('Status'),
+            td('Available for Hire')
+          )
         ),
-        div(
-          span('Age\t'),
-          new Date().getYear() - new Date('11 April 1997').getYear()
-        ),
-        div(
-          span('Skillset\t'),
-          `Junior-Mid Web Developer`
+        hr(),
+        footer(
+          section(
+            h4('Reach Me At'),
+            div(`saul@grimstack.io`)
+          ),
+          section(
+            h4('Find Me On'),
+            div(
+              link('https://medium.com/@saulvdw', 'medium', true),
+              link('https://github.com/SaulDoesCode', 'github', true)
+            )
+          )
         )
       )
     )

@@ -292,6 +292,10 @@ a:hover {
   margin: 20px auto;
 }
 
+.self-summary>footer a:hover {
+  text-decoration: underline;
+}
+
 .self-summary>footer>section {
   display: inline-block;
   margin: 5px;

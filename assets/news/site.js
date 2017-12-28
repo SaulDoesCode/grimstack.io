@@ -1,5 +1,6 @@
 {
   /* global rilti fetch localStorage */
+
   const {dom, each, run} = rilti
   const {a, header, h1, h3, p, span, div, footer, time, option, main, img} = dom
 
@@ -68,9 +69,13 @@
 
   const getSources = async () => {
     try {
-      const res = await fetch(`https://newsapi.org/v2/sources?language=en&apiKey=${apiKey}`)
-      const {sources, status} = await res.json()
-      checkOK(status)
+      let sources = JSON.parse(localStorage.getItem('sources') || '[]')
+      if (rilti.isEmpty(sources)) {
+        const json = await (await fetch(`https://newsapi.org/v2/sources?language=en&apiKey=${apiKey}`)).json()
+        checkOK(json.status)
+        localStorage.setItem('sources', JSON.stringify(sources = json.sources))
+      }
+
       const dropDown = dom.select({
         id: 'source-selector',
         on: {
@@ -121,16 +126,22 @@
 
   const getNews = async (source = defaultSource) => {
     try {
-      const res = await fetch(`https://newsapi.org/v2/top-headlines?sources=${source}&apiKey=${apiKey}`)
-      const {status, articles} = await res.json()
+      const {status, articles} = await (await fetch(`https://newsapi.org/v2/top-headlines?sources=${source}&apiKey=${apiKey}`)).json()
       checkOK(status)
+      localStorage.setItem('articles', JSON.stringify(articles))
       sitecontent.innerHTML = ''
       each(articles, renderArticle)
     } catch (err) {
       console.error(`Ran into trouble fetching news from ${source}: `, err)
+      const articles = JSON.parse(localStorage.getItem('articles') || '[]')
+      if (!rilti.isEmpty(articles)) each(articles, renderArticle)
     }
   }
 
   getNews()
   getSources()
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/news/sw.js')
+  }
 }

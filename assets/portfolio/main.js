@@ -1,15 +1,12 @@
 {
-/* global rilti location */
-  const {dom, domfn: {attrToggle, Class, hasClass}, notifier, extend, run, route, isStr, on, once} = rilti
-  const {a, p, header, footer, article, main, nav, section, span, div, hr, h1, h4, img, table, tr, td} = dom
+  // <- gotta keep the global scope clean
 
-  const randInt = (min, max) => ~~(Math.random() * (max - min + 1) + min)
+  /* global rilti location */
+  // ^- let StandardJS linter know about global things
 
-  const log = console.log.bind(console)
-  const err = console.error.bind(console)
-  const warn = console.warn.bind(console)
-
-  const model = rilti.model()
+  // destructure all the things :D
+  const {dom, domfn: {attrToggle, Class, hasClass}, notifier, extend, run, route, isStr} = rilti
+  const {a, p, header, footer, article, main, nav, section, div, hr, h1, h2, h4, img, table, tr, td} = dom
 
   const link = (href, contents, newtab = false, cls) => {
     if (isStr(newtab)) [cls, newtab] = [newtab, !!cls]
@@ -24,11 +21,9 @@
   )
   }
 
-  const content = main({
-    render: 'body',
-    id: 'main-content'
-  })
+  const randInt = (min, max) => ~~(Math.random() * (max - min + 1) + min)
 
+  // use css variables and transitions to create a nice themey site wide coloring
   const theme = {
     colorize: (color = theme.colors[randInt(0, theme.colors.length - 1)]) => run(() => {
       document.body.style.setProperty('--bg-color', theme.activeColor = color)
@@ -41,16 +36,25 @@
       'hsl(125,56%,57%)'
     ]
   }
+  // change the site's coloring every 8 seconds
   setInterval(() => theme.colorize(), 8000)
 
-  const fancyHeader = ({title, render = content, inner = '', options = {}}) => header(
-  extend({class: 'fancy-header', render}, options),
-  h1(title),
-  inner
-)
+  // <main id="main-content"> - element hosting all the site's content
+  const content = main({ render: 'body', id: 'main-content' })
 
-  const head = fancyHeader({title: `SaulDoesCode`})
+  // | Text_____  | <- ease of use fancy heading generator
+  // | -_----_--- |
+  const fancyHeading = ({title, render = content, inner = '', options = {}}) => header(
+    extend({class: 'fancy-heading', render}, options),
+    h1(title),
+    inner
+  )
 
+  // main site heading, also where nav will live
+  const head = fancyHeading({title: `SaulDoesCode`})
+
+  // event driven navigation aproach with routing
+  // simple styled hash links for virtual pages or site sections
   const navRack = notifier({
     links: [
       link('#/projects', 'projects'),
@@ -73,11 +77,11 @@
       }
     }),
     init () {
-      const {each, rack, emit, on} = navRack
+      const {each, rack, emit} = navRack
       each(link => {
         rack.appendChild(link)
 
-        on.change((_, l) => {
+        navRack.on.change((_, l) => {
           if (l !== link) Class(link, 'active', false)
         })
         const href = link.getAttribute('href')
@@ -97,7 +101,7 @@
         })
       })
 
-      rilti.on.wheel(head, e => {
+      head.onwheel = e => {
         e.preventDefault()
         const {links, active} = navRack
         const i = links.indexOf(active)
@@ -107,7 +111,7 @@
           else if (next < 0) next = links.length - 1
         }
         links[next].activate()
-      }, true)
+      }
     }
   })
 
@@ -147,6 +151,11 @@
         'SuperModel.js',
         `a proxy driven data reactivity library`,
         'https://github.com/SaulDoesCode/SuperModel.js'
+      ),
+      projectBox(
+        'echo-memfile',
+        `an extention for the golang echo web framework that serves files from memory.`,
+        'https://github.com/SaulDoesCode/echo-memfile'
       )
     )
   ),
@@ -168,11 +177,11 @@
       article({
         class: 'self-summary'
       },
-        dom.h2('Overview'),
+        h2('Overview'),
         p(`
-          Hi, I'm Saul and developing for the Web is my fulltime obsession second only to my love of philosophy.
-          Ever since my first taste of programming at 14
-          I've been tinkering away ever since building everything from simple doodles, golang servers to my own batteries included
+          Hi, I'm Saul and developing for the Web is my fulltime obsession matched only by my love of philosophy.
+          Ever since my first taste of programming at 14 I've just kept tinkering away,
+          building everything from simple doodles, golang servers to my own batteries included
           javascript framework; even this personal site is built with rilti.js and homespun CSS.
         `),
         img({
@@ -181,7 +190,7 @@
             src: '/media/Saul.jpg'
           }
         }),
-        dom.h2('Details'),
+        h2('Details'),
         table(
           tr(
             td('Age '),
@@ -194,6 +203,14 @@
           tr(
             td('Nationality '),
             td('South African')
+          ),
+          tr(
+            td('Native Language'),
+            td('English/Afrikaans')
+          ),
+          tr(
+            td('Modest Grasp'),
+            td('French, Mandarin')
           ),
           tr(
             td('Skillset'),
@@ -214,7 +231,8 @@
             h4('Find Me On'),
             div(
               link('https://medium.com/@saulvdw', 'medium', true),
-              link('https://github.com/SaulDoesCode', 'github', true)
+              link('https://github.com/SaulDoesCode', 'github', true),
+              link('https://codepen.io/SaulDoesCode', 'codepen', true)
             )
           )
         )
@@ -222,19 +240,17 @@
     )
   }
 
+  // site wide data/event monitoring with the proxy driven rilti.model
+  const model = rilti.model()
+
   navRack.on.change(href => {
-    if (href.includes('projects')) {
-      model.activeView = 'projects'
-    } else if (href.includes('skills')) {
-      model.activeView = 'skills'
-    } else if (href.includes('about')) {
-      model.activeView = 'about'
-    }
+    if (href.includes('projects')) model.activeView = 'projects'
+    else if (href.includes('skills')) model.activeView = 'skills'
+    else if (href.includes('about')) model.activeView = 'about'
 
     if (model.activeView in views) {
       if (model.activeSection) model.activeSection.remove()
-      model.activeSection = views[model.activeView]
-      content.append(model.activeSection)
+      content.append(model.activeSection = views[model.activeView])
     }
   })
 }

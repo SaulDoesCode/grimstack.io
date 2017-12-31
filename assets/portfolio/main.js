@@ -134,30 +134,30 @@
       class: 'content-view',
       id: 'projects-view'
     },
-    div({
-      class: 'item-grid'
-    },
-      projectBox(
-        'rilti.js',
-        `a future forward frontend framework`,
-        'https://github.com/SaulDoesCode/rilti.js'
-      ),
-      projectBox(
-        'Rilti News PWA',
-        `a Progressive Web App written with rilti.js, using newsapi.org for content.`,
-        '/news'
-      ),
-      projectBox(
-        'SuperModel.js',
-        `a proxy driven data reactivity library`,
-        'https://github.com/SaulDoesCode/SuperModel.js'
-      ),
-      projectBox(
-        'echo-memfile',
-        `an extention for the golang echo web framework that serves files from memory.`,
-        'https://github.com/SaulDoesCode/echo-memfile'
+      div({
+        class: 'item-grid'
+      },
+        projectBox(
+          'rilti.js',
+          `a future forward frontend framework`,
+          'https://github.com/SaulDoesCode/rilti.js'
+        ),
+        projectBox(
+          'Rilti News PWA',
+          `a Progressive Web App written with rilti.js, using newsapi.org for content.`,
+          '/news'
+        ),
+        projectBox(
+          'SuperModel.js',
+          `a proxy driven data reactivity library`,
+          'https://github.com/SaulDoesCode/SuperModel.js'
+        ),
+        projectBox(
+          'echo-memfile',
+          `an extention for the golang echo web framework that serves files from memory.`,
+          'https://github.com/SaulDoesCode/echo-memfile'
+        )
       )
-    )
   ),
     skills: section({
       class: 'content-view',

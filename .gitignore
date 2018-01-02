@@ -101,3 +101,5 @@ userfiles
 main
 assets/media/
 assets/downloads/
+*.png
+*.jpg

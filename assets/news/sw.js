@@ -3,6 +3,7 @@ importScripts('/js/sw-toolbox.js')
 
 toolbox.precache([
   '/news/index.html',
+  '/news/images/icons/icon-128x128.png',
   '/js/rilti.min.js',
   '/news/site.js',
   '/news/site.css',

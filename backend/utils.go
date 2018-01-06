@@ -3,20 +3,22 @@ package grimstack
 import (
 	"bytes"
 	"compress/gzip"
-	"crypto/rand"
 	"crypto/md5"
- 	"encoding/hex"
- 	"encoding/json"
-	"io/ioutil"
-	"github.com/tidwall/gjson"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+
+	"github.com/tidwall/gjson"
 )
 
 type obj = map[string]interface{}
 
 var (
-	Compressable = []string{"", ".txt", ".htm", ".html", ".css", ".php", ".js", ".json", ".md", ".mdown", ".xml", ".svg", ".go", ".cgi", ".py", ".pl", ".aspx", ".asp"}
+	Compressable     = []string{"", ".txt", ".htm", ".html", ".css", ".php", ".js", ".json", ".md", ".mdown", ".xml", ".svg", ".go", ".cgi", ".py", ".pl", ".aspx", ".asp"}
+	RandomDictionary = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 )
 
 func check(err error) error {
@@ -54,12 +56,10 @@ func compressBytes(data []byte) []byte {
 }
 
 func randBytes(size int) []byte {
-
-	dictionary := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	bits := make([]byte, size)
 	rand.Read(bits)
 	for k, v := range bits {
-		bits[k] = dictionary[v%byte(len(dictionary))]
+		bits[k] = RandomDictionary[v%byte(len(RandomDictionary))]
 	}
 	return bits
 }
@@ -68,17 +68,16 @@ func randStr(size int) string {
 	return string(randBytes(size))
 }
 
-
 func GetMD5Hash(text string) string {
-    hasher := md5.New()
-    hasher.Write([]byte(text))
-    return hex.EncodeToString(hasher.Sum(nil))
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func MD5Hash(data []byte) string {
-    hasher := md5.New()
-    hasher.Write(data)
-    return hex.EncodeToString(hasher.Sum(nil))
+	hasher := md5.New()
+	hasher.Write(data)
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func JSONbody(c ctx) (gjson.Result, error) {
@@ -90,7 +89,7 @@ func JSONbody(c ctx) (gjson.Result, error) {
 }
 
 func JSONErr(c ctx, code int, err string) error {
-	return c.JSONBlob(code, []byte(`{"err":"`+ err +`"}`))
+	return c.JSONBlob(code, []byte(`{"err":"`+err+`"}`))
 }
 
 func ReadJSONFile(location string) (gjson.Result, error) {
